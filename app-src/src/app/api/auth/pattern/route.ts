@@ -6,6 +6,7 @@ import bcrypt from "bcryptjs";
 export async function POST(req: NextRequest) {
   try {
     const { pattern } = await req.json();
+    console.log("Received pattern:", pattern);
     const ip = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown";
 
     // Get or create login attempt record for this IP

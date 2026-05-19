@@ -101,17 +101,14 @@ export default function PatternGrid({ onPatternComplete, disabled, error }: Patt
 
   // Touch events
   const onTouchStart = (e: React.TouchEvent) => {
-    e.preventDefault();
     const touch = e.touches[0];
     handleStart(touch.clientX, touch.clientY);
   };
   const onTouchMove = (e: React.TouchEvent) => {
-    e.preventDefault();
     const touch = e.touches[0];
     handleMove(touch.clientX, touch.clientY);
   };
   const onTouchEnd = (e: React.TouchEvent) => {
-    e.preventDefault();
     handleEnd();
   };
 
@@ -160,7 +157,7 @@ export default function PatternGrid({ onPatternComplete, disabled, error }: Patt
             y1={line.y1}
             x2={line.x2}
             y2={line.y2}
-            stroke={error ? "rgba(255, 80, 80, 0.8)" : "rgba(255, 255, 255, 0.6)"}
+            stroke={error ? "rgba(229, 62, 62, 0.9)" : "rgba(194, 155, 74, 0.9)"}
             strokeWidth={2.5}
             strokeLinecap="round"
           />
@@ -180,23 +177,23 @@ export default function PatternGrid({ onPatternComplete, disabled, error }: Patt
                 animate={{
                   scale: isSelected ? 1.3 : 1,
                   borderColor: error
-                    ? "rgba(255, 80, 80, 0.8)"
+                    ? "rgba(229, 62, 62, 0.9)"
                     : isSelected
-                    ? "rgba(255, 255, 255, 0.8)"
-                    : "rgba(255, 255, 255, 0.2)",
+                    ? "#C29B4A"
+                    : "rgba(184, 142, 60, 0.6)",
                 }}
                 transition={{ type: "spring", stiffness: 400, damping: 20 }}
               />
               {/* Inner dot */}
               <motion.div
-                className={`pattern-dot-inner ${error ? "error" : ""}`}
+                className={`pattern-dot-inner ${error ? "error" : ""} ${isSelected ? "active" : ""}`}
                 animate={{
-                  scale: isSelected ? 1.6 : 1,
+                  scale: isSelected ? 1.4 : 1,
                   backgroundColor: error
-                    ? "rgba(255, 80, 80, 0.9)"
+                    ? "rgba(229, 62, 62, 0.9)"
                     : isSelected
-                    ? "rgba(255, 255, 255, 0.9)"
-                    : "rgba(255, 255, 255, 0.35)",
+                    ? "#C29B4A"
+                    : "rgba(184, 142, 60, 0.4)",
                 }}
                 transition={{ type: "spring", stiffness: 400, damping: 20 }}
               />

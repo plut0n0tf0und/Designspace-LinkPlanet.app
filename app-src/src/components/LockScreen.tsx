@@ -1,29 +1,41 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import PatternGrid from "@/components/PatternGrid";
 import { useRouter } from "next/navigation";
 
-type AuthStage = "pattern" | "password" | "success";
+type AuthStage = "pattern" | "password" | "opening";
 
 export default function LockScreen() {
+  const router = useRouter();
   const [stage, setStage] = useState<AuthStage>("pattern");
   const [patternError, setPatternError] = useState(false);
   const [passwordError, setPasswordError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  
+  const [mounted, setMounted] = useState(false);
+  const [particles, setParticles] = useState<any[]>([]);
+
+  useEffect(() => {
+    setMounted(true);
+    setParticles(
+      Array.from({ length: 30 }).map(() => ({
+        left: `${Math.random() * 100}%`,
+        animationDelay: `${Math.random() * 8}s`,
+        animationDuration: `${6 + Math.random() * 8}s`,
+        opacity: 0.2 + Math.random() * 0.4,
+        width: `${2 + Math.random() * 4}px`,
+        height: `${2 + Math.random() * 4}px`,
+      }))
+    );
+  }, []);
+
   const [shake, setShake] = useState(false);
   const [password, setPassword] = useState("");
   const passwordRef = useRef<HTMLInputElement>(null);
-  const router = useRouter();
-
-  const triggerShake = () => {
-    setShake(true);
-    setTimeout(() => setShake(false), 500);
-  };
 
   const handlePatternComplete = async (pattern: number[]) => {
-    if (isLoading) return;
     setIsLoading(true);
     setPatternError(false);
 
@@ -37,15 +49,13 @@ export default function LockScreen() {
       const data = await res.json();
 
       if (data.success) {
-        // Pattern correct — reveal password
         setStage("password");
         setTimeout(() => passwordRef.current?.focus(), 600);
       } else {
         setPatternError(true);
         triggerShake();
-        setTimeout(() => setPatternError(false), 1500);
       }
-    } catch {
+    } catch (e) {
       setPatternError(true);
       triggerShake();
     } finally {
@@ -55,7 +65,8 @@ export default function LockScreen() {
 
   const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isLoading || !password.trim()) return;
+    if (!password || isLoading) return;
+
     setIsLoading(true);
     setPasswordError(false);
 
@@ -69,203 +80,133 @@ export default function LockScreen() {
       const data = await res.json();
 
       if (data.success) {
-        setStage("success");
-        // Wait for curtain animation to complete, then navigate
+        setStage("opening");
+        
+        // Cinematic sequence
         setTimeout(() => {
           router.push("/dashboard");
-        }, 1400);
+        }, 2500); // Wait for the magical door and zoom animation
       } else {
         setPasswordError(true);
         triggerShake();
-        setPassword("");
-        setTimeout(() => setPasswordError(false), 1500);
+        setIsLoading(false);
       }
-    } catch {
+    } catch (e) {
       setPasswordError(true);
       triggerShake();
-    } finally {
       setIsLoading(false);
     }
   };
 
+  const triggerShake = () => {
+    setShake(true);
+    setTimeout(() => setShake(false), 500);
+  };
+
+  // Scene animation variants
+  const backgroundVariants = {
+    pattern: { scale: 1, filter: "blur(0px) brightness(1)" },
+    password: { scale: 1.4, filter: "blur(3px) brightness(0.9)" }, // Zooms directly into the door via CSS transform-origin
+    opening: { scale: 5, filter: "blur(8px) brightness(1.5)" } // Fly into the doorway
+  };
+
   return (
-    <div className="lock-screen">
-      {/* Background atmosphere */}
-      <div className="lock-bg" />
-
-      {/* Curtain — left */}
-      <motion.div
-        className="curtain curtain-left"
-        animate={
-          stage === "success"
-            ? { x: "-100%", opacity: 0 }
-            : stage === "password"
-            ? { x: "-8%" }
-            : { x: "0%" }
-        }
-        transition={{
-          type: "spring",
-          stiffness: stage === "success" ? 60 : 100,
-          damping: stage === "success" ? 20 : 25,
-          mass: 1.2,
-        }}
+    <div className={`scene-container ${stage === "opening" ? "is-opening" : ""}`}>
+      {/* 1. Cinematic Background */}
+      <motion.div 
+        className="scene-background"
+        initial="pattern"
+        animate={stage}
+        variants={backgroundVariants}
+        transition={{ duration: 2.5, ease: [0.2, 0.8, 0.2, 1] }}
       />
 
-      {/* Curtain — right */}
-      <motion.div
-        className="curtain curtain-right"
-        animate={
-          stage === "success"
-            ? { x: "100%", opacity: 0 }
-            : stage === "password"
-            ? { x: "8%" }
-            : { x: "0%" }
-        }
-        transition={{
-          type: "spring",
-          stiffness: stage === "success" ? 60 : 100,
-          damping: stage === "success" ? 20 : 25,
-          mass: 1.2,
-        }}
+      {/* 2. Portal Bloom (Fades in when door opens) */}
+      <div className="portal-bloom" />
+
+      {/* 3. Ambient Particles */}
+      <div className="scene-particles">
+        {mounted && particles.map((style, i) => (
+          <div key={i} className="particle" style={style} />
+        ))}
+      </div>
+
+      {/* 4. White Flash Transition */}
+      <motion.div 
+        className="scene-flash"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: stage === "opening" ? 1 : 0 }}
+        transition={{ duration: 1.5, delay: 1 }}
       />
 
-      {/* Curtain center fold line */}
-      <motion.div
-        className="curtain-seam"
-        animate={{
-          opacity: stage === "success" ? 0 : stage === "password" ? 0.3 : 0.6,
-          scaleX: stage === "password" ? 1.5 : 1,
-        }}
-        transition={{ duration: 0.6 }}
-      />
-
-      {/* Auth content */}
-      <div className="lock-content">
+      {/* 5. UI Layer */}
+      <div className="ui-layer">
         <motion.div
-          className="lock-container"
           animate={shake ? { x: [0, -12, 12, -8, 8, 0] } : { x: 0 }}
           transition={{ duration: 0.5 }}
+          style={{ width: "100%", display: "flex", justifyContent: "center" }}
         >
-          {/* App branding */}
-          <motion.div
-            className="lock-branding"
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.6 }}
-          >
-            <h1 className="lock-title">LinkPlanet</h1>
-            <p className="lock-subtitle">
-              {stage === "pattern" && "Draw your pattern to continue"}
-              {stage === "password" && "Enter your password"}
-              {stage === "success" && "Welcome back"}
-            </p>
-          </motion.div>
-
-          {/* Pattern stage */}
           <AnimatePresence mode="wait">
             {stage === "pattern" && (
               <motion.div
                 key="pattern"
-                className="lock-stage"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
+                className="glass-card"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: -20 }}
-                transition={{ duration: 0.4 }}
+                transition={{ duration: 0.5 }}
               >
-                <div className="glass-card pattern-card">
-                  <PatternGrid
-                    onPatternComplete={handlePatternComplete}
-                    disabled={isLoading}
-                    error={patternError}
-                  />
-                </div>
+                <h2 className="card-title">Draw Unlock Pattern</h2>
+                <p className="card-subtitle">Connect the symbols in any order</p>
+                
+                <PatternGrid
+                  onPatternComplete={handlePatternComplete}
+                  disabled={isLoading}
+                  error={patternError}
+                />
+                
+                <p className="card-footer-link">Forgot Pattern?</p>
               </motion.div>
             )}
 
-            {/* Password stage */}
             {stage === "password" && (
               <motion.div
                 key="password"
-                className="lock-stage"
-                initial={{ opacity: 0, y: 30, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ duration: 0.5, delay: 0.1 }}
+                className="glass-card"
+                initial={{ opacity: 0, scale: 0.95, y: 30 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
               >
-                <div className="glass-card password-card">
-                  <form onSubmit={handlePasswordSubmit} className="password-form">
-                    <div className={`password-input-wrapper ${passwordError ? "error" : ""}`}>
-                      <input
-                        ref={passwordRef}
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        placeholder="Password"
-                        className="password-input"
-                        disabled={isLoading}
-                        autoComplete="off"
-                      />
-                      <div className="password-input-glow" />
-                    </div>
-                    <motion.button
-                      type="submit"
-                      className="password-submit"
-                      disabled={isLoading || !password.trim()}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                    >
-                      {isLoading ? (
-                        <span className="loading-dots">
-                          <span>.</span><span>.</span><span>.</span>
-                        </span>
-                      ) : (
-                        "Enter"
-                      )}
-                    </motion.button>
-                  </form>
-                </div>
-              </motion.div>
-            )}
-
-            {/* Success stage */}
-            {stage === "success" && (
-              <motion.div
-                key="success"
-                className="lock-stage"
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.6 }}
-              >
-                <motion.div
-                  className="success-icon"
-                  initial={{ scale: 0, rotate: -180 }}
-                  animate={{ scale: 1, rotate: 0 }}
-                  transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.2 }}
-                >
-                  ✓
-                </motion.div>
+                <h2 className="card-title">Enter Password</h2>
+                <p className="card-subtitle">Your realm awaits</p>
+                
+                <form onSubmit={handlePasswordSubmit} className="password-form">
+                  <div className={`password-input-wrapper ${passwordError ? "error" : ""}`}>
+                    <input
+                      ref={passwordRef}
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      disabled={isLoading}
+                      placeholder="••••••••"
+                      className="password-input"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={isLoading || password.length === 0}
+                    className="password-submit"
+                  >
+                    {isLoading ? "Unlocking..." : "Enter Realm"}
+                  </button>
+                </form>
+                
+                <p className="card-footer-link">Forgot Password?</p>
               </motion.div>
             )}
           </AnimatePresence>
         </motion.div>
-      </div>
-
-      {/* Ambient particles */}
-      <div className="lock-particles">
-        {Array.from({ length: 20 }).map((_, i) => (
-          <div
-            key={i}
-            className="particle"
-            style={{
-              left: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 8}s`,
-              animationDuration: `${6 + Math.random() * 8}s`,
-              opacity: 0.1 + Math.random() * 0.3,
-              width: `${2 + Math.random() * 3}px`,
-              height: `${2 + Math.random() * 3}px`,
-            }}
-          />
-        ))}
       </div>
     </div>
   );
