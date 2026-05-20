@@ -6,7 +6,13 @@ import bcrypt from "bcryptjs";
 export async function POST(req: NextRequest) {
   try {
     const { pattern } = await req.json();
-    console.log("Received pattern:", pattern);
+    if (!Array.isArray(pattern) || pattern.length < 2) {
+      return NextResponse.json(
+        { success: false, message: "Invalid pattern payload" },
+        { status: 400 }
+      );
+    }
+
     const ip = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown";
 
     // Get or create login attempt record for this IP
@@ -18,11 +24,46 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Validate pattern against hash
-    const patternString = pattern.join("-");
+    // Validate pattern against hash.
+    // Supports legacy 0-indexed / 1-indexed and separator variants.
     const patternHash = process.env.PATTERN_HASH || "";
+    if (!patternHash) {
+      console.error("PATTERN_HASH is not configured");
+      return NextResponse.json(
+        { success: false, message: "Pattern auth is not configured" },
+        { status: 500 }
+      );
+    }
 
-    const isValid = await bcrypt.compare(patternString, patternHash);
+    const normalizedPattern = pattern
+      .map((value) => Number(value))
+      .filter((value) => Number.isFinite(value));
+
+    const candidates = new Set<string>();
+    const oneIndexed = normalizedPattern.join("-");
+    const oneIndexedComma = normalizedPattern.join(",");
+    candidates.add(oneIndexed);
+    candidates.add(oneIndexedComma);
+
+    if (normalizedPattern.every((value) => value >= 1 && value <= 9)) {
+      const zeroIndexed = normalizedPattern.map((value) => value - 1);
+      candidates.add(zeroIndexed.join("-"));
+      candidates.add(zeroIndexed.join(","));
+    }
+
+    let isValid = false;
+    for (const candidate of candidates) {
+      if (patternHash.startsWith("$2")) {
+        if (await bcrypt.compare(candidate, patternHash)) {
+          isValid = true;
+          break;
+        }
+      } else if (candidate === patternHash) {
+        // Compatibility fallback when PATTERN_HASH was saved as plain text.
+        isValid = true;
+        break;
+      }
+    }
 
     if (!isValid) {
       // Increment pattern fails
