@@ -1,19 +1,36 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import NatureScene from "@/components/NatureScene";
-import { Plus, Link as LinkIcon, Home, Grid, BarChart2, Settings } from "lucide-react";
+import { Plus, Link as LinkIcon, Home, Grid, BarChart2, Settings, Loader2 } from "lucide-react";
+
+interface LinkItem {
+  id: string;
+  slug: string;
+  originalUrl: string;
+  active: boolean;
+  clicks: number;
+  createdAt: string;
+}
 
 export default function Dashboard() {
   const router = useRouter();
-  const dummyLinks = [
-    { slug: "myoffer.link/abc123", clicks: 4320 },
-    { slug: "myoffer.link/xyz789", clicks: 2980 },
-    { slug: "myoffer.link/hello10", clicks: 1850 },
-    { slug: "myoffer.link/promo24", clicks: 940 },
-    { slug: "myoffer.link/vip", clicks: 520 },
-  ];
+  const [links, setLinks] = useState<LinkItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/links")
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) setLinks(data.links);
+      })
+      .catch(err => console.error("Failed to fetch links:", err))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const activeLinks = links.filter(l => l.active);
 
   return (
     // 1. DashboardShell: Outer viewport wrapper with locked document context
@@ -36,8 +53,7 @@ export default function Dashboard() {
           }}
         >
           
-          {/* 3. ContentWrapper: left padding = right padding + scrollbar gutter (6px) so content stays visually centered */}
-          {/* Using standard Tailwind classes to ensure reliable JIT compilation */}
+          {/* 3. ContentWrapper */}
           <div className="w-full px-6 md:px-12 lg:px-20 pt-10 md:pt-14 pb-32 flex flex-col gap-6">
             
             <motion.div 
@@ -46,7 +62,7 @@ export default function Dashboard() {
               transition={{ duration: 0.8, delay: 0.2 }}
               className="flex flex-col"
             >
-              {/* Welcome Greeting Header - indents beautifully to align perfectly with the list content icons (40px mobile / 104px desktop from viewport edge) */}
+              {/* Welcome Greeting Header */}
               <div className="pl-4 md:pl-6">
                 <h1 
                   className="font-cinzel text-3xl font-bold text-[var(--text-primary)]"
@@ -57,7 +73,7 @@ export default function Dashboard() {
                 </h1>
               </div>
 
-              {/* 4. Apple/Airbnb Style Premium List Container */}
+              {/* 4. Premium List Container */}
               <div 
                 className="w-full bg-white/75 backdrop-blur-xl border border-[rgba(231,199,122,0.25)] rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.02)] overflow-hidden flex flex-col"
               >
@@ -73,7 +89,7 @@ export default function Dashboard() {
                       className="text-[10px] md:text-[11px] font-bold uppercase tracking-wider bg-[var(--accent-glow)] rounded-full text-[#b88e3c] flex-shrink-0"
                       style={{ padding: '4px 12px' }}
                     >
-                      {dummyLinks.length} Active
+                      {activeLinks.length} Active
                     </span>
                     <button 
                       onClick={() => router.push('/dashboard/create')}
@@ -88,32 +104,55 @@ export default function Dashboard() {
 
                 {/* Rows container */}
                 <div className="flex flex-col">
-                  {dummyLinks.map((link, i) => (
-                    <div key={link.slug} className="w-full flex flex-col">
-                      
-                      {/* Divider line spanning edge-to-edge of the card */}
-                      {i > 0 && <div className="border-t border-stone-200/20" />}
-                      
-                      {/* Each Link Row: min-height 64px mobile / 72px desktop */}
-                      {/* Responsive inner padding (16px mobile, 24px tablet, 32px PC) forced via raw CSS */}
-                      <div 
-                        className="group flex items-center justify-between min-h-[64px] md:min-h-[72px] responsive-row-padding hover:bg-[rgba(231,199,122,0.06)] transition-all duration-[180ms] ease-out cursor-pointer hover:shadow-[0_4px_12px_rgba(231,199,122,0.03)]"
-                      >
-                        {/* Left Side: Icon + URL (gap between icon and url: 14px) */}
-                        <div className="flex items-center gap-[14px]">
-                          {/* Link Icon Capsule */}
-                          <div className="w-10 h-10 flex-shrink-0 bg-[var(--accent-glow)] text-[#b88e3c] rounded-xl flex items-center justify-center transition-all duration-200 group-hover:scale-105">
-                            <LinkIcon size={18} />
+                  {loading ? (
+                    /* Loading Skeleton */
+                    <div className="flex items-center justify-center" style={{ padding: '40px 0' }}>
+                      <Loader2 size={20} className="animate-spin text-[var(--text-muted)]" />
+                      <span className="text-[12px] font-semibold text-[var(--text-muted)] ml-2">Loading links...</span>
+                    </div>
+                  ) : links.length === 0 ? (
+                    /* Empty State */
+                    <div className="flex flex-col items-center justify-center" style={{ padding: '40px 0' }}>
+                      <div className="w-12 h-12 bg-[var(--accent-glow)] text-[#b88e3c] rounded-2xl flex items-center justify-center" style={{ marginBottom: '12px' }}>
+                        <LinkIcon size={22} />
+                      </div>
+                      <p className="text-[13px] font-semibold text-[var(--text-secondary)]">No links yet</p>
+                      <p className="text-[11px] text-[var(--text-muted)]" style={{ marginTop: '4px' }}>Create your first shortened link to get started</p>
+                    </div>
+                  ) : (
+                    /* Link Rows */
+                    links.map((link, i) => (
+                      <div key={link.id} className="w-full flex flex-col">
+                        
+                        {/* Divider line spanning edge-to-edge of the card */}
+                        {i > 0 && <div className="border-t border-stone-200/20" />}
+                        
+                        {/* Each Link Row */}
+                        <div 
+                          className="group flex items-center justify-between min-h-[64px] md:min-h-[72px] responsive-row-padding hover:bg-[rgba(231,199,122,0.06)] transition-all duration-[180ms] ease-out cursor-pointer hover:shadow-[0_4px_12px_rgba(231,199,122,0.03)]"
+                        >
+                          {/* Left Side: Icon + URL */}
+                          <div className="flex items-center gap-[14px]">
+                            <div className="w-10 h-10 flex-shrink-0 bg-[var(--accent-glow)] text-[#b88e3c] rounded-xl flex items-center justify-center transition-all duration-200 group-hover:scale-105">
+                              <LinkIcon size={18} />
+                            </div>
+                            <div className="flex flex-col">
+                              <p className="text-[13px] md:text-sm font-semibold text-[var(--text-primary)] tracking-wide">
+                                myoffer.link/{link.slug}
+                              </p>
+                              <p className="text-[10px] text-[var(--text-muted)] font-medium" style={{ marginTop: '2px' }}>
+                                {link.originalUrl.length > 40 ? link.originalUrl.substring(0, 40) + '...' : link.originalUrl}
+                              </p>
+                            </div>
                           </div>
-                          
-                          {/* Slug Details */}
-                          <div className="flex flex-col">
-                            <p className="text-[13px] md:text-sm font-semibold text-[var(--text-primary)] tracking-wide">{link.slug}</p>
-                          </div>
+                          {/* Right Side: Click Count */}
+                          <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider flex-shrink-0">
+                            {link.clicks} {link.clicks === 1 ? 'click' : 'clicks'}
+                          </span>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    ))
+                  )}
                 </div>
               </div>
               

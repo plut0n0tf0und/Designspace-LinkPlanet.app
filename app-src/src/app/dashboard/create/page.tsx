@@ -19,16 +19,37 @@ export default function CreateLink() {
 
   const domain = "myoffer.link";
 
+  const [error, setError] = useState("");
+
   const handleGenerate = async () => {
     if (!longUrl.trim()) return;
     
     setIsGenerating(true);
+    setError("");
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 800));
+    try {
+      const res = await fetch("/api/links", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          url: longUrl.trim(),
+          slug: customSlug.trim() || undefined,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.message || "Failed to create link");
+        setIsGenerating(false);
+        return;
+      }
+
+      setGeneratedLink(`${domain}/${data.link.slug}`);
+    } catch {
+      setError("Network error. Please try again.");
+    }
     
-    const slug = customSlug.trim() || Math.random().toString(36).substring(2, 8);
-    setGeneratedLink(`${domain}/${slug}`);
     setIsGenerating(false);
   };
 
@@ -134,6 +155,16 @@ export default function CreateLink() {
                     </p>
                   </div>
                 </div>
+
+                {/* Error Message */}
+                {error && (
+                  <div 
+                    className="responsive-row-padding"
+                    style={{ paddingTop: '12px', paddingBottom: '0' }}
+                  >
+                    <p className="text-[12px] font-semibold text-[var(--error)]">{error}</p>
+                  </div>
+                )}
 
                 {/* Generate CTA */}
                 <div 
