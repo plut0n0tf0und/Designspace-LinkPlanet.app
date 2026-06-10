@@ -23,7 +23,7 @@ The product should feel clean, modern, lightweight, and production-ready.
 - One-click copy/share
 
 Example:
-https://yourapp.vercel.app/abc123
+xxooxxoo ^_____^
 
 ---
 
