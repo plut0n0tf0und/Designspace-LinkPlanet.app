@@ -1,22 +1,36 @@
 @import "tailwindcss";
 
+@theme {
+  --color-haiti: #18102b;
+  --color-chalk: #f5f3ff;
+  --color-electric: #834dfb;
+
+  /* Font system */
+  --font-heading: var(--font-syne);
+  --font-sans: var(--font-urbanist);
+}
+
 :root {
-  --background: #fafafa;
-  --foreground: #171717;
-  --accent: #b88e3c;
+  --background: #f5f3ff;
+  --foreground: #18102b;
+  --accent: #834dfb;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0f0f11;
-    --foreground: #f4f4f5;
-    --accent: #d4af37;
+    --background: #18102b;
+    --foreground: #f5f3ff;
+    --accent: #834dfb;
   }
 }
 
 body {
   background-color: var(--background);
   color: var(--foreground);
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-family: var(--font-urbanist), system-ui, sans-serif;
   min-height: 100vh;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-syne), system-ui, sans-serif;
 }

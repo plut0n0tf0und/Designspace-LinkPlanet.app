@@ -19,6 +19,7 @@ export async function POST(req: NextRequest) {
     const passwordHash = process.env.PASSWORD_HASH || "";
     const isValid = await bcrypt.compare(password, passwordHash);
 
+
     if (!isValid) {
       const updated = await prisma.loginAttempt.update({
         where: { ip },

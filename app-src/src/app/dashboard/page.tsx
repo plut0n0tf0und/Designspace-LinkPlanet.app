@@ -2,16 +2,226 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Link as LinkIcon, ExternalLink, Copy, Check, RefreshCw, Loader2, LogOut } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
+import {
+  Plus,
+  Link as LinkIcon,
+  Copy,
+  Check,
+  RefreshCw,
+  Loader2,
+  LogOut,
+} from "lucide-react";
 
 interface LinkItem {
   id: string;
   slug: string;
   originalUrl: string;
+  title?: string;
   active: boolean;
   clicks: number;
   createdAt: string;
+  countries?: string[];
 }
+
+// Sample demo card shown while the list is empty or as first card
+const SAMPLE_CARD: LinkItem = {
+  id: "sample-demo",
+  slug: "portfolio",
+  originalUrl: "https://sukoya.design",
+  title: "Sukoya Design",
+  active: true,
+  clicks: 142,
+  createdAt: new Date().toISOString(),
+  countries: ["IN", "US", "GB", "SG"],
+};
+
+function getScreenshotUrl(url: string) {
+  return `https://api.microlink.io/?url=${encodeURIComponent(url)}&screenshot=true&meta=false&embed=screenshot.url`;
+}
+
+function getDomain(url: string) {
+  try {
+    return new URL(url).hostname.replace("www.", "");
+  } catch {
+    return url;
+  }
+}
+
+function timeAgo(dateStr: string) {
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  if (diffDays === 0) return "Today";
+  if (diffDays === 1) return "Yesterday";
+  if (diffDays < 7) return `${diffDays} days ago`;
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+  if (diffDays < 365) return `${Math.floor(diffDays / 30)} months ago`;
+  return `${Math.floor(diffDays / 365)} years ago`;
+}
+
+function formatClicks(n: number) {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}k`;
+  return n.toString();
+}
+
+function countryFlag(code: string) {
+  // Uses flagcdn.com for high-quality flag images (like Telegram)
+  return `https://flagcdn.com/w40/${code.toLowerCase()}.png`;
+}
+
+interface LinkCardProps {
+  link: LinkItem;
+  host: string;
+  copiedId: string | null;
+  onCopy: (slug: string, id: string) => void;
+  isDemo?: boolean;
+}
+
+function LinkCard({ link, host, copiedId, onCopy, isDemo = false }: LinkCardProps) {
+  const router = useRouter();
+  const title = link.title || getDomain(link.originalUrl);
+  const isCopied = copiedId === link.id;
+  const shortUrl = `${host || "linkplanet.app"}/${link.slug}`;
+
+  const handleViewDetails = () => {
+    if (!isDemo) router.push(`/dashboard/links/${link.id}`);
+  };
+
+  return (
+    <div
+      className="group relative flex flex-col bg-[#120c22] border border-[#2b1f47]/50 rounded-[20px] overflow-hidden shadow-lg hover:shadow-[0_8px_40px_rgba(131,77,251,0.18)] hover:border-[#834dfb]/40 transition-all duration-300"
+      style={{ minHeight: "380px" }}
+    >
+      {/* Demo badge */}
+      {isDemo && (
+        <div className="absolute top-3 left-3 z-20 px-2 py-0.5 bg-[#834dfb]/90 text-white text-[11px] font-bold uppercase tracking-wider rounded-full backdrop-blur-sm">
+          Sample
+        </div>
+      )}
+
+      {/* Screenshot Image */}
+      <div className="relative w-full overflow-hidden flex-shrink-0" style={{ height: "190px" }}>
+        <img
+          src={getScreenshotUrl(link.originalUrl)}
+          alt={title}
+          className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-[1.03]"
+          loading="lazy"
+          onError={(e) => {
+            const el = e.currentTarget as HTMLImageElement;
+            el.style.display = "none";
+            if (el.parentElement) {
+              el.parentElement.style.background =
+                "linear-gradient(135deg, #1e1732 0%, #2b1f47 60%, #18102b 100%)";
+            }
+          }}
+        />
+        {/* bottom fade */}
+        <div
+          className="absolute bottom-0 left-0 right-0 h-10 pointer-events-none"
+          style={{ background: "linear-gradient(to bottom, transparent, #120c22)" }}
+        />
+        {/* Hover overlay: View Details */}
+        <div
+          onClick={handleViewDetails}
+          className={`absolute inset-0 flex items-center justify-center bg-black/55 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${isDemo ? "cursor-default" : "cursor-pointer"}`}
+        >
+          <div className="flex items-center gap-2 px-5 py-2.5 bg-white/10 border border-white/20 rounded-full text-white text-sm font-semibold backdrop-blur-sm hover:bg-white/20 transition-colors">
+            <span>View Details</span>
+            <ArrowUpRight size={15} />
+          </div>
+        </div>
+      </div>
+
+      {/* Card Body */}
+      <div className="flex flex-col gap-4 p-5 flex-1">
+
+        {/* Title + ACTIVE badge */}
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex flex-col gap-0.5 min-w-0">
+            <h3 className="text-white font-bold text-base leading-snug tracking-tight truncate">
+              {title}
+            </h3>
+            <span className="text-zinc-500 text-xs">
+              Created {timeAgo(link.createdAt)}
+            </span>
+          </div>
+          <span
+            className={`flex-shrink-0 mt-0.5 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-lg ${
+              link.active
+                ? "bg-[#2b1f47] text-[#a78bfa]"
+                : "bg-zinc-800/60 text-zinc-500"
+            }`}
+          >
+            {link.active ? "Live" : "Inactive"}
+          </span>
+        </div>
+
+        {/* Stats Row: Total Clicks (left) + Country flags (right) */}
+        <div className="flex items-end justify-between gap-2">
+          <div className="flex flex-col gap-0.5">
+            <span className="text-zinc-500 text-[11px] font-medium">Total Clicks</span>
+            <span className="text-white font-bold text-xl leading-tight">
+              {formatClicks(link.clicks)}
+            </span>
+          </div>
+          {link.countries && link.countries.length > 0 && (
+            <div className="flex items-center opacity-50 pb-0.5">
+              {link.countries.slice(0, 4).map((code, i) => (
+                <span
+                  key={code}
+                  className="flex items-center justify-center rounded-full overflow-hidden border-2 border-[#120c22] bg-[#1e1535] flex-shrink-0"
+                  style={{ width: "22px", height: "22px", marginLeft: i === 0 ? 0 : "-7px", zIndex: i + 1, position: "relative" }}
+                  title={code}
+                >
+                  <img src={countryFlag(code)} alt={code} className="w-full h-full object-cover" />
+                </span>
+              ))}
+              {link.countries.length > 4 && (
+                <span
+                  className="flex items-center justify-center rounded-full bg-[#2b1f47] border-2 border-[#120c22] text-[5px] text-zinc-400 font-bold flex-shrink-0"
+                  style={{ width: "22px", height: "22px", marginLeft: "-7px", zIndex: 5, position: "relative" }}
+                >
+                  +{link.countries.length - 4}
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Divider */}
+        <div className="border-t border-[#2b1f47]/70" />
+
+        {/* Short URL Row */}
+        <div className="flex items-center justify-between gap-2 mt-auto">
+          <div className="flex flex-col gap-0.5 min-w-0">
+            <span className="text-zinc-600 text-[10px] font-bold uppercase tracking-widest">
+              Short URL
+            </span>
+            <span className="text-zinc-300 text-sm font-mono truncate">
+              {shortUrl}
+            </span>
+          </div>
+          <button
+            onClick={() => onCopy(link.slug, link.id)}
+            className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-[#2b1f47]/60 hover:bg-[#2b1f47] border border-[#2b1f47]/80 hover:border-[#834dfb]/40 text-zinc-400 hover:text-white transition-all duration-200 cursor-pointer"
+            title="Copy short URL"
+          >
+            {isCopied ? (
+              <Check size={14} className="text-emerald-400" />
+            ) : (
+              <Copy size={14} />
+            )}
+          </button>
+        </div>
+
+      </div>
+    </div>
+  );
+}
+
 
 export default function Dashboard() {
   const router = useRouter();
@@ -46,8 +256,6 @@ export default function Dashboard() {
   };
 
   const handleLogout = async () => {
-    // We can clear cookie by calling a logout API or client-side cookie expiration
-    // Let's set it to expire in the past
     document.cookie = "auth-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
     router.push("/");
   };
@@ -56,14 +264,17 @@ export default function Dashboard() {
   const activeLinks = links.filter((l) => l.active).length;
   const totalClicks = links.reduce((sum, l) => sum + l.clicks, 0);
 
+  // Show sample card + real links in the grid
+  const displayCards = [SAMPLE_CARD, ...links];
+
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50 transition-colors duration-200">
+    <div className="min-h-screen bg-[#0e0818] text-zinc-100">
       
       {/* Top Navbar */}
-      <header className="border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 sticky top-0 z-30">
+      <header className="border-b border-[#2b1f47]/50 bg-[#120c22]/90 backdrop-blur-md sticky top-0 z-30">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2 font-bold text-xl tracking-tight text-zinc-900 dark:text-white">
-            <div className="w-8 h-8 rounded-lg bg-zinc-950 dark:bg-white text-white dark:text-zinc-950 flex items-center justify-center">
+          <div className="flex items-center gap-2 font-bold text-xl tracking-tight text-[#f5f3ff]">
+            <div className="w-8 h-8 rounded-lg bg-[#834dfb] text-white flex items-center justify-center">
               <LinkIcon size={16} />
             </div>
             <span>LinkPlanet</span>
@@ -71,8 +282,15 @@ export default function Dashboard() {
 
           <div className="flex items-center gap-4">
             <button
+              onClick={() => router.push("/dashboard/create")}
+              className="flex items-center gap-2 px-4 py-2 bg-[#834dfb] hover:bg-[#743deb] text-white rounded-[8px] text-sm font-semibold transition-colors"
+            >
+              <Plus size={15} />
+              New Link
+            </button>
+            <button
               onClick={handleLogout}
-              className="p-2 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-50 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+              className="p-2 text-zinc-500 hover:text-[#f5f3ff] rounded-lg hover:bg-[#2b1f47]/40 transition-colors"
               title="Logout"
             >
               <LogOut size={18} />
@@ -83,133 +301,89 @@ export default function Dashboard() {
 
       {/* Main Container */}
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        
-        {/* Welcome Section */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-10">
+
+        {/* Welcome + Stats Row */}
+        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6 mb-10">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
-              Manage your shortened URLs and review access statistics
+            <h1 className="text-3xl font-bold tracking-tight text-white">Dashboard</h1>
+            <p className="text-sm text-zinc-400 mt-1">
+              Manage and track your shortened links
             </p>
           </div>
+
+          {/* Inline Stats */}
+          <div className="flex items-center gap-3">
+            <div className="flex flex-col items-center px-5 py-3 bg-[#120c22] border border-[#2b1f47]/50 rounded-2xl min-w-[72px]">
+              <span className="text-2xl font-bold text-white" style={{ fontFamily: "var(--font-syne)" }}>{totalLinks}</span>
+              <span className="text-[10px] font-semibold uppercase tracking-widest text-zinc-500 mt-0.5">Links</span>
+            </div>
+            <div className="flex flex-col items-center px-5 py-3 bg-[#120c22] border border-[#2b1f47]/50 rounded-2xl min-w-[72px]">
+              <span className="text-2xl font-bold text-white" style={{ fontFamily: "var(--font-syne)" }}>{activeLinks}</span>
+              <span className="text-[10px] font-semibold uppercase tracking-widest text-zinc-500 mt-0.5">Active</span>
+            </div>
+            <div className="flex flex-col items-center px-5 py-3 bg-[#120c22] border border-[#2b1f47]/50 rounded-2xl min-w-[72px]">
+              <span className="text-2xl font-bold text-white" style={{ fontFamily: "var(--font-syne)" }}>{totalClicks}</span>
+              <span className="text-[10px] font-semibold uppercase tracking-widest text-zinc-500 mt-0.5">Clicks</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Section Header */}
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-lg font-bold text-white tracking-tight">Your Links</h2>
           <button
-            onClick={() => router.push("/dashboard/create")}
-            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-zinc-900 dark:bg-zinc-50 hover:bg-zinc-800 dark:hover:bg-zinc-200 text-white dark:text-zinc-900 rounded-xl text-sm font-semibold transition-colors shadow-sm self-start md:self-auto"
+            onClick={fetchLinks}
+            disabled={loading}
+            className="p-2 text-zinc-500 hover:text-zinc-300 rounded-lg hover:bg-[#2b1f47]/40 transition-colors"
+            title="Refresh"
           >
-            <Plus size={16} />
-            Create Link
+            <RefreshCw size={16} className={loading ? "animate-spin text-[#834dfb]" : ""} />
           </button>
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
-          <div className="bg-white dark:bg-zinc-900 p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm flex flex-col">
-            <span className="text-xs font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 mb-1">Total Links</span>
-            <span className="text-3xl font-bold">{totalLinks}</span>
+        {/* Card Grid */}
+        {loading ? (
+          <div className="py-20 flex flex-col items-center justify-center text-zinc-400">
+            <Loader2 size={32} className="animate-spin mb-4 text-[#834dfb]" />
+            <span className="text-sm font-semibold">Loading your links...</span>
           </div>
-          <div className="bg-white dark:bg-zinc-900 p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm flex flex-col">
-            <span className="text-xs font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 mb-1">Active Links</span>
-            <span className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">{activeLinks}</span>
-          </div>
-          <div className="bg-white dark:bg-zinc-900 p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm flex flex-col">
-            <span className="text-xs font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 mb-1">Total Clicks</span>
-            <span className="text-3xl font-bold text-amber-600 dark:text-amber-400">{totalClicks}</span>
-          </div>
-        </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {/* Sample demo card always first */}
+            <LinkCard
+              link={SAMPLE_CARD}
+              host={host}
+              copiedId={copiedId}
+              onCopy={handleCopy}
+              isDemo
+            />
 
-        {/* Links Table/List Container */}
-        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-sm overflow-hidden">
-          <div className="p-5 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between">
-            <h3 className="font-bold text-lg">Shortened Links</h3>
+            {/* Real link cards */}
+            {links.map((link) => (
+              <LinkCard
+                key={link.id}
+                link={link}
+                host={host}
+                copiedId={copiedId}
+                onCopy={handleCopy}
+              />
+            ))}
+
+            {/* Add New Card Placeholder */}
             <button
-              onClick={fetchLinks}
-              disabled={loading}
-              className="p-2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+              onClick={() => router.push("/dashboard/create")}
+              className="flex flex-col items-center justify-center gap-3 bg-[#120c22]/50 border-2 border-dashed border-[#2b1f47]/60 hover:border-[#834dfb]/50 hover:bg-[#2b1f47]/20 rounded-[20px] text-zinc-500 hover:text-[#834dfb] transition-all duration-300 cursor-pointer group"
+              style={{ minHeight: "340px" }}
             >
-              <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
+              <div className="w-12 h-12 rounded-full border-2 border-dashed border-zinc-600 group-hover:border-[#834dfb]/60 flex items-center justify-center transition-colors">
+                <Plus size={22} />
+              </div>
+              <span className="text-sm font-semibold">Add new link</span>
             </button>
           </div>
-
-          <div className="overflow-x-auto">
-            {loading ? (
-              <div className="py-20 flex flex-col items-center justify-center text-zinc-400">
-                <Loader2 size={32} className="animate-spin mb-4" />
-                <span className="text-sm font-semibold">Loading your links...</span>
-              </div>
-            ) : links.length === 0 ? (
-              <div className="py-20 flex flex-col items-center justify-center text-center px-4">
-                <div className="w-12 h-12 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-500 flex items-center justify-center mb-4">
-                  <LinkIcon size={24} />
-                </div>
-                <p className="font-bold text-zinc-800 dark:text-zinc-200">No links created yet</p>
-                <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1 max-w-sm">
-                  Create a new shortened link to start sharing and capturing details analytics.
-                </p>
-                <button
-                  onClick={() => router.push("/dashboard/create")}
-                  className="mt-6 px-4 py-2 bg-zinc-900 dark:bg-zinc-50 hover:bg-zinc-800 dark:hover:bg-zinc-200 text-white dark:text-zinc-900 text-sm font-semibold rounded-lg transition-colors"
-                >
-                  Create your first link
-                </button>
-              </div>
-            ) : (
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-zinc-50 dark:bg-zinc-800/40 text-xs font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 border-b border-zinc-200 dark:border-zinc-800">
-                    <th className="px-6 py-4">Short URL</th>
-                    <th className="px-6 py-4">Original Destination</th>
-                    <th className="px-6 py-4 text-center">Clicks</th>
-                    <th className="px-6 py-4">Created At</th>
-                    <th className="px-6 py-4 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
-                  {links.map((link) => (
-                    <tr key={link.id} className="hover:bg-zinc-50/50 dark:hover:bg-zinc-800/20 transition-colors">
-                      <td className="px-6 py-4 font-mono text-sm whitespace-nowrap text-zinc-900 dark:text-zinc-100 font-semibold">
-                        /{link.slug}
-                      </td>
-                      <td className="px-6 py-4 max-w-md truncate text-sm text-zinc-500 dark:text-zinc-400" title={link.originalUrl}>
-                        {link.originalUrl}
-                      </td>
-                      <td className="px-6 py-4 text-center whitespace-nowrap">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300">
-                          {link.clicks}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-sm whitespace-nowrap text-zinc-500 dark:text-zinc-400">
-                        {new Date(link.createdAt).toLocaleDateString()}
-                      </td>
-                      <td className="px-6 py-4 text-right whitespace-nowrap">
-                        <div className="flex items-center justify-end gap-2">
-                          <button
-                            onClick={() => handleCopy(link.slug, link.id)}
-                            className="p-1.5 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-                            title="Copy Short URL"
-                          >
-                            {copiedId === link.id ? <Check size={16} className="text-emerald-500" /> : <Copy size={16} />}
-                          </button>
-                          <a
-                            href={`${host}/${link.slug}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="p-1.5 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-                            title="Open Link"
-                          >
-                            <ExternalLink size={16} />
-                          </a>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
-        </div>
+        )}
 
       </main>
-
     </div>
   );
 }

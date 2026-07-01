@@ -60,20 +60,20 @@ export default function CreateLink() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50 transition-colors duration-200">
+    <div className="min-h-screen bg-zinc-50 dark:bg-haiti text-zinc-900 dark:text-chalk transition-colors duration-200">
       
       {/* Top Navbar */}
-      <header className="border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 sticky top-0 z-30">
+      <header className="border-b border-zinc-200 dark:border-[#2b1f47]/50 bg-white dark:bg-[#120b22] sticky top-0 z-30">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <button
             onClick={() => router.push("/dashboard")}
-            className="flex items-center gap-2 text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-50 font-semibold transition-colors"
+            className="flex items-center gap-2 text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-[#f5f3ff] font-semibold transition-colors"
           >
             <ArrowLeft size={16} />
             Back to Dashboard
           </button>
           
-          <div className="flex items-center gap-2 font-bold text-sm text-zinc-400 dark:text-zinc-500">
+          <div className="flex items-center gap-2 font-bold text-sm text-zinc-400 dark:text-electric/80">
             <LinkIcon size={14} />
             <span>LinkPlanet</span>
           </div>
@@ -100,7 +100,7 @@ export default function CreateLink() {
         )}
 
         {/* Form Container */}
-        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-sm p-6 mb-8">
+        <div className="bg-white dark:bg-[#120b22] border border-zinc-200 dark:border-[#2b1f47]/50 rounded-2xl shadow-sm p-6 mb-8">
           <form onSubmit={handleGenerate} className="flex flex-col gap-6">
             
             {/* Long Destination URL */}
@@ -114,7 +114,7 @@ export default function CreateLink() {
                 value={longUrl}
                 onChange={(e) => setLongUrl(e.target.value)}
                 placeholder="https://example.com/your-very-long-url-here"
-                className="w-full p-3 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl outline-none focus:border-zinc-400 dark:focus:border-zinc-500 transition-colors text-sm"
+                className="w-full p-3 bg-zinc-50 dark:bg-[#1e1732] border border-zinc-200 dark:border-[#2b1f47]/40 rounded-xl outline-none focus:border-zinc-400 dark:focus:border-electric focus:ring-1 focus:ring-electric/20 transition-all text-sm"
               />
               <span className="text-[11px] text-zinc-400 dark:text-zinc-500">
                 The long destination page where users will be redirected.
@@ -127,7 +127,7 @@ export default function CreateLink() {
                 Custom Endpoint (optional)
               </label>
               <div className="flex items-center">
-                <span className="p-3 bg-zinc-100 dark:bg-zinc-800 border border-r-0 border-zinc-200 dark:border-zinc-700 rounded-l-xl text-zinc-500 dark:text-zinc-400 text-sm font-mono whitespace-nowrap">
+                <span className="p-3 bg-zinc-100 dark:bg-[#1e1732] border border-r-0 border-zinc-200 dark:border-[#2b1f47]/40 rounded-l-xl text-zinc-500 dark:text-zinc-400 text-sm font-mono whitespace-nowrap">
                   /
                 </span>
                 <input
@@ -135,7 +135,7 @@ export default function CreateLink() {
                   value={customSlug}
                   onChange={(e) => setCustomSlug(e.target.value)}
                   placeholder="my-custom-endpoint"
-                  className="w-full p-3 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-r-xl outline-none focus:border-zinc-400 dark:focus:border-zinc-500 transition-colors text-sm"
+                  className="w-full p-3 bg-zinc-50 dark:bg-[#1e1732] border border-zinc-200 dark:border-[#2b1f47]/40 rounded-r-xl outline-none focus:border-zinc-400 dark:focus:border-electric focus:ring-1 focus:ring-electric/20 transition-all text-sm"
                 />
               </div>
               <span className="text-[11px] text-zinc-400 dark:text-zinc-500">
@@ -146,7 +146,7 @@ export default function CreateLink() {
             <button
               type="submit"
               disabled={isGenerating || !longUrl.trim()}
-              className="mt-2 py-3 px-4 bg-zinc-900 dark:bg-zinc-50 hover:bg-zinc-800 dark:hover:bg-zinc-200 text-white dark:text-zinc-900 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="mt-2 py-3 px-4 bg-zinc-900 dark:bg-electric hover:bg-zinc-800 dark:hover:bg-electric/90 text-white rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isGenerating ? (
                 <>
@@ -166,7 +166,7 @@ export default function CreateLink() {
 
         {/* Result Card */}
         {generatedLink && (
-          <div className="bg-emerald-500/10 dark:bg-emerald-500/5 border border-emerald-500/20 dark:border-emerald-500/10 rounded-2xl p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-fade-in">
+          <div className="bg-emerald-500/10 dark:bg-[#2b1f47]/30 border border-emerald-500/20 dark:border-[#2b1f47]/40 rounded-2xl p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-fade-in">
             <div className="flex flex-col gap-1">
               <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
                 Successfully Generated!
