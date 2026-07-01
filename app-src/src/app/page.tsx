@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Script from "next/script";
-import { Lock, Eye, EyeOff, ShieldAlert, Loader2, Sparkles, Info } from "lucide-react";
+import { Lock, Eye, EyeOff, ShieldAlert, Loader2, Info } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -54,7 +54,7 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="relative min-h-screen w-full flex items-center justify-center p-4 bg-zinc-950 overflow-hidden select-none">
+    <main className="relative min-h-screen w-full flex flex-col items-center justify-center p-4 bg-[#050b0b] overflow-hidden select-none">
       
       {/* Load Spline Web Component Script */}
       <Script 
@@ -65,51 +65,54 @@ export default function LoginPage() {
 
       {/* Full-Screen Interactive 3D Spline Scene */}
       {mounted && (
-        <div className="absolute inset-0 w-full h-full z-0 pointer-events-auto select-none opacity-90 transition-opacity duration-1000">
+        <div className="absolute inset-0 w-full h-full z-0 pointer-events-auto select-none opacity-45">
           <spline-viewer url="https://prod.spline.design/IFweu3cI4HJQU3Wj/scene.splinecode" className="w-full h-full"></spline-viewer>
         </div>
       )}
 
       {/* Cinematic Vignette Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/20 to-zinc-950 pointer-events-none z-5" />
+      <div className="absolute inset-0 bg-[#050b0b]/60 pointer-events-none z-5" />
 
-      {/* Liquid Glass Login Card Overlay */}
+      {/* Top Header Label */}
+      <div className="absolute top-12 left-0 right-0 text-center z-10">
+        <span className="text-[10px] font-bold tracking-[0.45em] text-[#3ca8a1]/40 uppercase">
+          LinkPlanet Link Manager
+        </span>
+      </div>
+
+      {/* Redesigned Login Card */}
       <div 
-        className={`w-full max-w-sm bg-zinc-950/35 backdrop-blur-3xl border border-white/10 hover:border-white/15 rounded-2xl shadow-[0_30px_70px_rgba(0,0,0,0.85)] p-8 flex flex-col items-center z-10 transition-all duration-300 ${
-          shake ? "animate-shake border-red-500/40 shadow-[0_0_30px_rgba(239,68,68,0.2)]" : ""
+        className={`w-full max-w-[420px] bg-[#0b1617]/90 border border-[#1b3232]/50 rounded-2xl shadow-[0_25px_60px_rgba(0,0,0,0.85)] px-10 py-12 flex flex-col items-center z-10 transition-all duration-300 ${
+          shake ? "animate-shake border-red-500/40 shadow-[0_0_30px_rgba(239,68,68,0.15)]" : ""
         }`}
       >
-        {/* Brand Badge */}
-        <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/5 text-[11px] font-semibold text-zinc-300 tracking-wide mb-8 shadow-sm">
-          <Sparkles size={11} className="text-zinc-400 animate-pulse" />
-          <span>LinkPlanet Link Manager</span>
+        {/* Centered Floating Lock Icon */}
+        <div className="w-16 h-16 rounded-full bg-[#132526] border border-[#1e3435] text-zinc-100 flex items-center justify-center mb-8 shadow-md">
+          <Lock size={20} className="text-zinc-200" />
         </div>
 
-        {/* Floating Lock Icon with Inner Shadow */}
-        <div className="w-12 h-12 rounded-full bg-white/5 border border-white/10 text-white flex items-center justify-center mb-4 shadow-[inset_0_2px_4px_rgba(255,255,255,0.05)]">
-          <Lock size={18} className="text-zinc-300" />
-        </div>
-
-        {/* Title and Instruction Header */}
-        <h1 className="text-xl font-light tracking-[0.25em] text-white text-center mb-1">
+        {/* Header Titles */}
+        <h1 className="text-3xl font-normal tracking-[0.15em] text-[#e8f1f0] text-center mb-2">
           SECURE PORTAL
         </h1>
-        <p className="text-[11px] text-zinc-400 text-center mb-8 tracking-wide">
+        <p className="text-xs text-teal-100/50 text-center mb-10 tracking-wide font-normal">
           Provide authorization credentials to proceed.
         </p>
 
-        {/* UX-compliant Error Alert */}
+        {/* Error Alert Box */}
         {error && (
-          <div className="w-full flex items-start gap-3 bg-red-500/10 border border-red-500/20 rounded-xl p-3 text-xs leading-relaxed text-red-300 mb-6 animate-fadeIn">
+          <div className="w-full flex items-start gap-3 bg-red-500/10 border border-red-500/20 rounded-xl p-3.5 text-xs leading-relaxed text-red-300 mb-6 animate-fadeIn">
             <ShieldAlert size={16} className="flex-shrink-0 mt-0.5 text-red-400" />
             <span>{error}</span>
           </div>
         )}
 
-        {/* Auth Form */}
-        <form onSubmit={handlePasswordSubmit} className="w-full flex flex-col gap-5">
-          <div className="flex flex-col gap-2 relative">
-            <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 pl-1">
+        {/* Login Form */}
+        <form onSubmit={handlePasswordSubmit} className="w-full flex flex-col items-center">
+          
+          {/* Password Section */}
+          <div className="w-full flex flex-col gap-2.5 mb-6">
+            <label className="text-[9px] font-bold uppercase tracking-[0.25em] text-[#4b6a6b] pl-1">
               Security Password
             </label>
             <div className="relative w-full flex items-center">
@@ -118,15 +121,15 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={isLoading}
-                placeholder="••••••••"
-                className="w-full pl-4 pr-12 py-3.5 bg-white/5 hover:bg-white/10 focus:bg-white/10 border border-white/10 focus:border-white/30 rounded-xl text-white placeholder-zinc-600 text-center tracking-widest text-lg font-mono focus:ring-1 focus:ring-white/10 outline-none transition-all shadow-[inset_0_1px_2px_rgba(255,255,255,0.02)]"
+                placeholder="••••••••••••"
+                className="w-full pl-5 pr-14 py-4 bg-[#050b0b]/60 border border-[#1b3030] rounded-xl text-teal-100 placeholder-[#162a2b] text-center tracking-widest text-lg font-mono focus:border-[#2b4c4c] focus:bg-[#070f0f] focus:ring-1 focus:ring-[#2b4c4c]/30 outline-none transition-all"
                 autoFocus
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 disabled={isLoading}
-                className="absolute right-2 w-10 h-10 flex items-center justify-center text-zinc-500 hover:text-white rounded-lg transition-colors cursor-pointer"
+                className="absolute right-3 w-10 h-10 flex items-center justify-center text-[#385354] hover:text-[#52797a] rounded-lg transition-colors cursor-pointer"
                 title={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -134,28 +137,37 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {/* Elegant Pill Hint Badge */}
-          <div className="self-center flex items-center gap-1.5 px-3 py-1 bg-white/5 border border-white/5 rounded-full text-[10px] text-zinc-400 font-medium tracking-wide">
-            <Info size={11} className="text-zinc-500" />
-            <span>Hint: <span className="font-semibold text-zinc-200">Katana</span></span>
+          {/* Hint Badge Pill */}
+          <div className="flex items-center gap-1.5 px-4 py-1.5 bg-[#122424]/50 border border-[#1a3030] rounded-full text-[10px] text-teal-100/50 font-medium tracking-wide mb-8 shadow-sm">
+            <Info size={11} className="text-[#385354]" />
+            <span>Hint: <span className="font-semibold text-teal-200">Katana</span></span>
           </div>
 
-          {/* Verify / Unlock CTA */}
+          {/* Submit Button */}
           <button
             type="submit"
             disabled={isLoading || !password}
-            className="w-full mt-2 py-3.5 px-4 bg-white hover:bg-zinc-100 active:scale-[0.98] disabled:bg-zinc-800 disabled:text-zinc-500 disabled:scale-100 text-zinc-950 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md shadow-white/5"
+            className="w-full py-4 px-4 bg-[#d2e7e5] hover:bg-[#c2dedb] active:scale-[0.98] disabled:bg-[#132526] disabled:text-[#385354] disabled:scale-100 text-[#0b1617] rounded-xl text-xs font-bold uppercase tracking-[0.25em] flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md shadow-[#d2e7e5]/5"
           >
             {isLoading ? (
               <>
                 <Loader2 size={13} className="animate-spin" />
-                Verifying Credentials...
+                Verifying...
               </>
             ) : (
               "Unlock Access"
             )}
           </button>
         </form>
+      </div>
+
+      {/* Bottom Footer Info */}
+      <div className="absolute bottom-6 left-8 z-10 flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-[0.2em] text-[#436465]">
+        <span className="w-1.5 h-1.5 rounded-full bg-[#3ca8a1] animate-pulse"></span>
+        <span>System Encrypted</span>
+      </div>
+      <div className="absolute bottom-6 right-8 z-10 text-[9px] font-bold uppercase tracking-[0.2em] text-[#436465]">
+        Ref: 88-X/Alpha
       </div>
 
       {/* Global CSS keyframe overrides */}
