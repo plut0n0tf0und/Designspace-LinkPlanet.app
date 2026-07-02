@@ -87,7 +87,7 @@ export default function CreateLink() {
 
         {/* Form Container Card - conforming to 20px card radius, #120c22 bg, border-[#2b1f47]/50 */}
         <div className="bg-[#120c22] border border-[#2b1f47]/50 rounded-[20px] p-5 shadow-xl mb-8">
-          <form onSubmit={handleGenerate} className="flex flex-col gap-6">
+          <form onSubmit={handleGenerate} className="flex flex-col gap-5">
             
             {/* Long Destination URL */}
             <div className="flex flex-col gap-2">
