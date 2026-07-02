@@ -465,7 +465,7 @@ export default function Dashboard() {
             </div>
             <div className="flex flex-col items-center px-5 py-3 bg-[#120c22] border border-[#2b1f47]/50 rounded-2xl min-w-[72px]">
               <span className="text-2xl font-bold text-white" style={{ fontFamily: "var(--font-syne)" }}>{totalClicks}</span>
-              <span className="text-[10px] font-semibold uppercase tracking-widest text-zinc-500 mt-0.5">Clicks</span>
+              <span className="text-[10px] font-semibold uppercase tracking-widest text-zinc-500 mt-0.5">Total Clicks</span>
             </div>
           </div>
         </div>
