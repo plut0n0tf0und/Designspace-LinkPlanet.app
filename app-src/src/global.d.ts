@@ -1,6 +1,6 @@
-import * as React from 'react';
+declare module 'react-simple-maps';
 
-declare global {
+declare namespace React {
   namespace JSX {
     interface IntrinsicElements {
       'spline-viewer': any;
@@ -8,10 +8,8 @@ declare global {
   }
 }
 
-declare module 'react' {
-  namespace JSX {
-    interface IntrinsicElements {
-      'spline-viewer': any;
-    }
+declare namespace JSX {
+  interface IntrinsicElements {
+    'spline-viewer': any;
   }
 }

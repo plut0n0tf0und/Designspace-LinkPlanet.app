@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowUpRight } from "lucide-react";
 import {
@@ -11,7 +11,13 @@ import {
   RefreshCw,
   Loader2,
   LogOut,
+  ToggleLeft,
+  ToggleRight,
+  Trash2,
 } from "lucide-react";
+import { motion, useAnimationControls } from "framer-motion";
+import ConfirmDeactivateModal from "@/components/ConfirmDeactivateModal";
+import ConfirmDeleteModal from "@/components/ConfirmDeleteModal";
 
 interface LinkItem {
   id: string;
@@ -77,10 +83,12 @@ interface LinkCardProps {
   host: string;
   copiedId: string | null;
   onCopy: (slug: string, id: string) => void;
+  onToggle: (id: string, active: boolean) => void;
+  onDelete: (id: string) => void;
   isDemo?: boolean;
 }
 
-function LinkCard({ link, host, copiedId, onCopy, isDemo = false }: LinkCardProps) {
+function LinkCard({ link, host, copiedId, onCopy, onToggle, onDelete, isDemo = false }: LinkCardProps) {
   const router = useRouter();
   const title = link.title || getDomain(link.originalUrl);
   const isCopied = copiedId === link.id;
@@ -88,6 +96,15 @@ function LinkCard({ link, host, copiedId, onCopy, isDemo = false }: LinkCardProp
 
   const handleViewDetails = () => {
     if (!isDemo) router.push(`/dashboard/links/${link.id}`);
+  };
+
+  const handleToggle = () => {
+    if (!isDemo) onToggle(link.id, !link.active);
+  };
+
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!isDemo) onDelete(link.id);
   };
 
   return (
@@ -138,7 +155,7 @@ function LinkCard({ link, host, copiedId, onCopy, isDemo = false }: LinkCardProp
       {/* Card Body */}
       <div className="flex flex-col gap-4 p-5 flex-1">
 
-        {/* Title + ACTIVE badge */}
+        {/* Title + ACTIVE badge + Toggle */}
         <div className="flex items-start justify-between gap-3">
           <div className="flex flex-col gap-0.5 min-w-0">
             <h3 className="text-white font-bold text-base leading-snug tracking-tight truncate">
@@ -148,15 +165,21 @@ function LinkCard({ link, host, copiedId, onCopy, isDemo = false }: LinkCardProp
               Created {timeAgo(link.createdAt)}
             </span>
           </div>
-          <span
-            className={`flex-shrink-0 mt-0.5 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-lg ${
-              link.active
-                ? "bg-[#2b1f47] text-[#a78bfa]"
-                : "bg-zinc-800/60 text-zinc-500"
-            }`}
-          >
-            {link.active ? "Live" : "Inactive"}
-          </span>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleToggle}
+              disabled={isDemo}
+              className={`flex-shrink-0 mt-0.5 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-lg flex items-center gap-1.5 transition-all ${
+                link.active
+                  ? "bg-[#2b1f47] text-[#a78bfa] hover:bg-[#3b2a5a]"
+                  : "bg-zinc-800/60 text-zinc-500 hover:bg-zinc-700/60 hover:text-zinc-300"
+              } ${isDemo ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
+              title={link.active ? "Deactivate link" : "Activate link"}
+            >
+              {link.active ? <ToggleRight size={12} /> : <ToggleLeft size={12} />}
+              {link.active ? "Live" : "Inactive"}
+            </button>
+          </div>
         </div>
 
         {/* Stats Row: Total Clicks (left) + Country flags (right) */}
@@ -223,12 +246,90 @@ function LinkCard({ link, host, copiedId, onCopy, isDemo = false }: LinkCardProp
 }
 
 
+/* ─── Animated New Link CTA ─── */
+function NewLinkButton({ onClick }: { onClick: () => void }) {
+  const [hovered, setHovered] = useState(false);
+
+  return (
+    <motion.button
+      onClick={onClick}
+      onHoverStart={() => setHovered(true)}
+      onHoverEnd={() => setHovered(false)}
+      whileTap={{ scale: 0.96 }}
+      className="relative flex items-center gap-2 px-4 py-2 text-white rounded-[8px] text-sm font-semibold overflow-hidden select-none"
+      style={{ isolation: "isolate" }}
+    >
+      {/* Breathing glow aura behind the button */}
+      <motion.span
+        aria-hidden
+        className="absolute inset-0 rounded-[8px] pointer-events-none"
+        animate={{
+          boxShadow: hovered
+            ? [
+                "0 0 0px 0px rgba(131,77,251,0)",
+                "0 0 18px 6px rgba(131,77,251,0.55)",
+                "0 0 12px 4px rgba(131,77,251,0.35)",
+              ]
+            : [
+                "0 0 8px 2px rgba(131,77,251,0.18)",
+                "0 0 16px 5px rgba(131,77,251,0.32)",
+                "0 0 8px 2px rgba(131,77,251,0.18)",
+              ],
+        }}
+        transition={{
+          duration: hovered ? 0.6 : 2.8,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+      />
+
+      {/* Solid background */}
+      <motion.span
+        aria-hidden
+        className="absolute inset-0 rounded-[8px] pointer-events-none"
+        animate={{ backgroundColor: hovered ? "#743deb" : "#834dfb" }}
+        transition={{ duration: 0.18 }}
+      />
+
+      {/* Shimmer sweep — single diagonal highlight that glides across on hover */}
+      <motion.span
+        aria-hidden
+        className="absolute inset-0 pointer-events-none rounded-[8px]"
+        style={{
+          background:
+            "linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.18) 50%, transparent 70%)",
+          backgroundSize: "200% 100%",
+        }}
+        animate={{ backgroundPosition: hovered ? "100% 0%" : "-100% 0%" }}
+        transition={{ duration: 0.55, ease: "easeOut" }}
+      />
+
+      {/* Content */}
+      <motion.span
+        className="relative z-10 flex items-center gap-2"
+        animate={{ x: hovered ? 1 : 0 }}
+        transition={{ duration: 0.18 }}
+      >
+        <motion.span
+          animate={{ rotate: hovered ? 90 : 0 }}
+          transition={{ duration: 0.25, ease: [0.34, 1.56, 0.64, 1] }}
+        >
+          <Plus size={15} />
+        </motion.span>
+        New Link
+      </motion.span>
+    </motion.button>
+  );
+}
+
 export default function Dashboard() {
   const router = useRouter();
   const [links, setLinks] = useState<LinkItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [host, setHost] = useState("");
+  const [deactivatingLink, setDeactivatingLink] = useState<LinkItem | null>(null);
+  const [deletingLink, setDeletingLink] = useState<LinkItem | null>(null);
 
   const fetchLinks = () => {
     setLoading(true);
@@ -260,6 +361,54 @@ export default function Dashboard() {
     router.push("/");
   };
 
+  const handleToggle = async (id: string, active: boolean) => {
+    if (!active) {
+      const targetLink = links.find((l) => l.id === id);
+      if (targetLink) {
+        setDeactivatingLink(targetLink);
+        return;
+      }
+    }
+    await executeToggle(id, active);
+  };
+
+  const executeToggle = async (id: string, active: boolean) => {
+    try {
+      const res = await fetch(`/api/links/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ active }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setLinks(links.map(l => l.id === id ? { ...l, active } : l));
+      }
+    } catch (err) {
+      console.error("Toggle error:", err);
+    }
+  };
+
+  const handleDeleteClick = (id: string) => {
+    const targetLink = links.find((l) => l.id === id);
+    if (targetLink) {
+      setDeletingLink(targetLink);
+    }
+  };
+
+  const executeDelete = async (id: string) => {
+    try {
+      const res = await fetch(`/api/links/${id}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if (data.success) {
+        setLinks(links.filter((l) => l.id !== id));
+      }
+    } catch (err) {
+      console.error("Delete error:", err);
+    }
+  };
+
   const totalLinks = links.length;
   const activeLinks = links.filter((l) => l.active).length;
   const totalClicks = links.reduce((sum, l) => sum + l.clicks, 0);
@@ -281,13 +430,6 @@ export default function Dashboard() {
           </div>
 
           <div className="flex items-center gap-4">
-            <button
-              onClick={() => router.push("/dashboard/create")}
-              className="flex items-center gap-2 px-4 py-2 bg-[#834dfb] hover:bg-[#743deb] text-white rounded-[8px] text-sm font-semibold transition-colors"
-            >
-              <Plus size={15} />
-              New Link
-            </button>
             <button
               onClick={handleLogout}
               className="p-2 text-zinc-500 hover:text-[#f5f3ff] rounded-lg hover:bg-[#2b1f47]/40 transition-colors"
@@ -331,14 +473,17 @@ export default function Dashboard() {
         {/* Section Header */}
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-lg font-bold text-white tracking-tight">Your Links</h2>
-          <button
-            onClick={fetchLinks}
-            disabled={loading}
-            className="p-2 text-zinc-500 hover:text-zinc-300 rounded-lg hover:bg-[#2b1f47]/40 transition-colors"
-            title="Refresh"
-          >
-            <RefreshCw size={16} className={loading ? "animate-spin text-[#834dfb]" : ""} />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={fetchLinks}
+              disabled={loading}
+              className="p-2 text-zinc-500 hover:text-zinc-300 rounded-lg hover:bg-[#2b1f47]/40 transition-colors"
+              title="Refresh"
+            >
+              <RefreshCw size={16} className={loading ? "animate-spin text-[#834dfb]" : ""} />
+            </button>
+            <NewLinkButton onClick={() => router.push("/dashboard/create")} />
+          </div>
         </div>
 
         {/* Card Grid */}
@@ -355,6 +500,8 @@ export default function Dashboard() {
               host={host}
               copiedId={copiedId}
               onCopy={handleCopy}
+              onToggle={handleToggle}
+              onDelete={() => {}}
               isDemo
             />
 
@@ -366,6 +513,8 @@ export default function Dashboard() {
                 host={host}
                 copiedId={copiedId}
                 onCopy={handleCopy}
+                onToggle={handleToggle}
+                onDelete={handleDeleteClick}
               />
             ))}
 
@@ -384,6 +533,32 @@ export default function Dashboard() {
         )}
 
       </main>
+
+      <ConfirmDeactivateModal
+        isOpen={!!deactivatingLink}
+        onConfirm={async () => {
+          if (deactivatingLink) {
+            await executeToggle(deactivatingLink.id, false);
+            setDeactivatingLink(null);
+          }
+        }}
+        onCancel={() => setDeactivatingLink(null)}
+      />
+
+      <ConfirmDeleteModal
+        isOpen={!!deletingLink}
+        title={deletingLink?.title || (deletingLink ? getDomain(deletingLink.originalUrl) : "")}
+        slug={deletingLink?.slug || ""}
+        originalUrl={deletingLink?.originalUrl || ""}
+        clicks={deletingLink?.clicks || 0}
+        onConfirm={async () => {
+          if (deletingLink) {
+            await executeDelete(deletingLink.id);
+            setDeletingLink(null);
+          }
+        }}
+        onCancel={() => setDeletingLink(null)}
+      />
     </div>
   );
 }

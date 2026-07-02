@@ -14,6 +14,8 @@
 
 ### Rules
 - Base font size: **16px** (never smaller for body)
+- Micro fonts/Hint fonts size gotta be **14px** (never smaller)
+- Caption/Label fonts size: **14px** (never smaller)
 - Headings: bold or semibold weight only
 - Labels & microcopy: `text-[10px]–text-xs`, uppercase + tracked wide
 - Monospace (`font-mono`): short URLs and slugs only

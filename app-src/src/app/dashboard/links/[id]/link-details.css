@@ -1,0 +1,233 @@
+/* Custom Toggle Switch Styles */
+.toggle-switch {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 30px;
+  border: 4px solid rgba(58, 58, 58, 0.1);
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.5) inset;
+  height: 38px;
+  margin: 2px;
+  position: relative;
+  width: 96px;
+  display: inline-block;
+  user-select: none;
+}
+
+.toggle-switch-input {
+  position: absolute;
+  visibility: hidden;
+  user-select: none;
+}
+
+.toggle-switch-label {
+  cursor: pointer;
+  display: block;
+  height: 34px;
+  text-indent: -9999px;
+  width: 92px;
+  user-select: none;
+}
+
+.toggle-switch-label::before {
+  background: #fff;
+  background: -webkit-radial-gradient(45%, circle, rgb(255, 58, 58) 0%, rgb(255, 113, 113) 100%);
+  border-radius: 8px;
+  border: 1px solid #742323;
+  box-shadow: 0 2px 5px rgba(255, 67, 48, 0.6), 0 0 5px rgba(255, 159, 109, 0.5) inset;
+  content: "";
+  display: block;
+  height: 8px;
+  left: -20%;
+  position: absolute;
+  top: 13px;
+  transition: all 0.2s;
+  width: 8px;
+  z-index: 12;
+  user-select: none;
+}
+
+.toggle-switch-label::after {
+  background: #fff;
+  background: -moz-radial-gradient(45%, circle, rgba(60, 60, 60, 0.6) 0%, rgba(151, 151, 151, 0.6) 100%);
+  border-radius: 8px;
+  border: 1px solid #111;
+  box-shadow: 0 2px 5px rgba(20, 20, 20, 0.5);
+  content: "";
+  display: block;
+  height: 8px;
+  right: -20%;
+  position: absolute;
+  top: 13px;
+  transition: all 0.2s;
+  width: 8px;
+  z-index: 12;
+  user-select: none;
+}
+
+.toggle-switch-label span {
+  background: linear-gradient(#4f4f4f, #2b2b2b);
+  border-radius: 30px;
+  border: 1px solid #1a1a1a;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.5), 0 1px 1px rgba(255, 255, 255, 0.1) inset, 0 -2px 0 rgba(0, 0, 0, 0.2) inset;
+  display: block;
+  height: 30px;
+  left: 1px;
+  position: absolute;
+  top: 1px;
+  -webkit-transition: all 0.2s linear;
+  -moz-transition: all 0.2s linear;
+  -o-transition: all 0.2s linear;
+  transition: all 0.2s linear;
+  width: 42px;
+  user-select: none;
+}
+
+.toggle-switch-label span::before {
+  background: #fff;
+  background: -webkit-linear-gradient(left, rgba(48, 48, 48, 0.4), rgba(34, 34, 34, 0.4));
+  background: linear-gradient(left, rgba(48, 48, 48, 0.4), rgba(34, 34, 34, 0.4));
+  border-radius: 30px 8px 8px 30px;
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.2) inset;
+  content: "";
+  display: block;
+  height: 26px;
+  left: 2px;
+  position: absolute;
+  top: 2px;
+  width: 17px;
+  user-select: none;
+}
+
+.toggle-switch-label span::after {
+  background: #fff;
+  background: -webkit-linear-gradient(right, rgba(48, 48, 48, 0.4), rgba(34, 34, 34, 0.4));
+  border-radius: 8px 30px 30px 8px;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2) inset;
+  content: "";
+  display: block;
+  height: 26px;
+  position: absolute;
+  right: 2px;
+  top: 2px;
+  width: 17px;
+  user-select: none;
+}
+
+.toggle-switch-input:checked + .toggle-switch-label span {
+  left: 47px;
+}
+
+.toggle-switch-input:checked + .toggle-switch-label::before {
+  background: -webkit-radial-gradient(45%, circle, rgba(60, 60, 60, 0.6) 0%, rgba(151, 151, 151, 0.6) 100%);
+  border: 1px solid #111;
+  box-shadow: 0 2px 5px rgba(20, 20, 20, 0.5);
+  user-select: none;
+}
+
+.toggle-switch-input:checked + .toggle-switch-label::after {
+  background: -webkit-radial-gradient(45%, circle, lightgreen  0%, lightgreen 100%);
+  border: 1px solid #004562;
+  box-shadow: 0 2px 5px green, 0 0 5px green inset;
+  user-select: none;
+}
+
+/* Copy Button Animations */
+@keyframes copySuccess {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes checkmark {
+  0% {
+    transform: scale(0) rotate(-45deg);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2) rotate(10deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+.copy-button-success {
+  animation: copySuccess 0.3s ease-out;
+}
+
+.checkmark-animate {
+  animation: checkmark 0.4s ease-out;
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+.copy-button-ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.copy-button-ripple::after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  background-image: radial-gradient(circle, rgba(131, 77, 251, 0.3) 10%, transparent 10.01%);
+  background-repeat: no-repeat;
+  background-position: 50%;
+  transform: scale(10, 10);
+  opacity: 0;
+  transition: transform 0.5s, opacity 0.5s;
+}
+
+.copy-button-ripple:active::after {
+  transform: scale(0, 0);
+  opacity: 0.3;
+  transition: 0s;
+}
+
+/* Mobile layout tweaks */
+@media (max-width: 640px) {
+  .shortened-url-input-group {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: stretch;
+  }
+
+  /* Keep the URL box on its own full-width line */
+  .shortened-url-input {
+    flex: 0 0 100%;
+    width: 100%;
+  }
+
+  /* Buttons in a single row: Visit (75%) / Copy (25%) */
+  .visit-button {
+    flex: 0 0 75%;
+    width: 75%;
+    justify-content: center;
+  }
+
+  .copy-button {
+    flex: 0 0 25%;
+    width: 25%;
+    justify-content: center;
+  }
+}
