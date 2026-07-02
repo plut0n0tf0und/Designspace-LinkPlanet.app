@@ -114,7 +114,7 @@ function LinkCard({ link, host, copiedId, onCopy, onToggle, onDelete, isDemo = f
     >
       {/* Demo badge */}
       {isDemo && (
-        <div className="absolute top-3 left-3 z-20 px-2 py-0.5 bg-[#834dfb]/90 text-white text-[11px] font-bold uppercase tracking-wider rounded-full backdrop-blur-sm">
+        <div className="absolute top-3 left-3 z-20 px-2 py-0.5 bg-[#834dfb]/90 text-white text-sm font-bold uppercase tracking-wider rounded-full backdrop-blur-sm">
           Sample
         </div>
       )}
@@ -161,7 +161,7 @@ function LinkCard({ link, host, copiedId, onCopy, onToggle, onDelete, isDemo = f
             <h3 className="text-white font-bold text-base leading-snug tracking-tight truncate" style={{ fontFamily: "var(--font-syne)" }}>
               {title}
             </h3>
-            <span className="text-zinc-500 text-xs" style={{ fontFamily: "var(--font-urbanist)" }}>
+            <span className="text-zinc-500 text-sm" style={{ fontFamily: "var(--font-urbanist)" }}>
               Created {timeAgo(link.createdAt)}
             </span>
           </div>
@@ -169,7 +169,7 @@ function LinkCard({ link, host, copiedId, onCopy, onToggle, onDelete, isDemo = f
             <button
               onClick={handleToggle}
               disabled={isDemo}
-              className={`flex-shrink-0 mt-0.5 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-lg flex items-center gap-1.5 transition-all ${
+              className={`flex-shrink-0 mt-0.5 px-2.5 py-1 text-sm font-bold uppercase tracking-wider rounded-lg flex items-center gap-1.5 transition-all ${
                 link.active
                   ? "bg-[#2b1f47] text-[#a78bfa] hover:bg-[#3b2a5a]"
                   : "bg-zinc-800/60 text-zinc-500 hover:bg-zinc-700/60 hover:text-zinc-300"
@@ -186,7 +186,7 @@ function LinkCard({ link, host, copiedId, onCopy, onToggle, onDelete, isDemo = f
         {/* Stats Row: Total Clicks (left) + Country flags (right) */}
         <div className="flex items-end justify-between gap-2">
           <div className="flex flex-col gap-0.5">
-            <span className="text-zinc-500 text-[11px] font-medium" style={{ fontFamily: "var(--font-urbanist)" }}>Total Clicks</span>
+            <span className="text-zinc-500 text-sm font-medium" style={{ fontFamily: "var(--font-urbanist)" }}>Total Clicks</span>
             <span className="text-white font-bold text-xl leading-tight" style={{ fontFamily: "var(--font-syne)" }}>
               {formatClicks(link.clicks)}
             </span>
@@ -221,7 +221,7 @@ function LinkCard({ link, host, copiedId, onCopy, onToggle, onDelete, isDemo = f
         {/* Short URL Row */}
         <div className="flex items-center justify-between gap-2 mt-auto">
           <div className="flex flex-col gap-0.5 min-w-0">
-            <span className="text-zinc-600 text-[10px] font-bold uppercase tracking-widest" style={{ fontFamily: "var(--font-urbanist)" }}>
+            <span className="text-zinc-600 text-sm font-bold uppercase tracking-widest" style={{ fontFamily: "var(--font-urbanist)" }}>
               Short URL
             </span>
             <span className="text-zinc-300 text-sm font-mono truncate">
@@ -458,15 +458,15 @@ export default function Dashboard() {
           <div className="flex items-center gap-3">
             <div className="flex flex-col items-center px-5 py-3 bg-[#120c22] border border-[#2b1f47]/50 rounded-[20px] min-w-[72px]">
               <span className="text-2xl font-bold text-white" style={{ fontFamily: "var(--font-syne)" }}>{totalLinks}</span>
-              <span className="text-[10px] font-semibold uppercase tracking-widest text-zinc-500 mt-0.5">Links</span>
+              <span className="text-sm font-semibold uppercase tracking-widest text-zinc-500 mt-0.5">Links</span>
             </div>
             <div className="flex flex-col items-center px-5 py-3 bg-[#120c22] border border-[#2b1f47]/50 rounded-[20px] min-w-[72px]">
               <span className="text-2xl font-bold text-white" style={{ fontFamily: "var(--font-syne)" }}>{activeLinks}</span>
-              <span className="text-[10px] font-semibold uppercase tracking-widest text-zinc-500 mt-0.5">Active</span>
+              <span className="text-sm font-semibold uppercase tracking-widest text-zinc-500 mt-0.5">Active</span>
             </div>
             <div className="flex flex-col items-center px-5 py-3 bg-[#120c22] border border-[#2b1f47]/50 rounded-[20px] min-w-[72px]">
               <span className="text-2xl font-bold text-white" style={{ fontFamily: "var(--font-syne)" }}>{totalClicks}</span>
-              <span className="text-[10px] font-semibold uppercase tracking-widest text-zinc-500 mt-0.5">Total Clicks</span>
+              <span className="text-sm font-semibold uppercase tracking-widest text-zinc-500 mt-0.5">Total Clicks</span>
             </div>
           </div>
         </div>

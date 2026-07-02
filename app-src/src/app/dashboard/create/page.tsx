@@ -91,7 +91,7 @@ export default function CreateLink() {
             
             {/* Long Destination URL */}
             <div className="flex flex-col gap-2">
-              <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500" style={{ fontFamily: "var(--font-syne)" }}>
+              <label className="text-sm font-bold uppercase tracking-widest text-zinc-500" style={{ fontFamily: "var(--font-syne)" }}>
                 Destination URL
               </label>
               <input
@@ -109,7 +109,7 @@ export default function CreateLink() {
 
             {/* Custom Slug */}
             <div className="flex flex-col gap-2">
-              <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500" style={{ fontFamily: "var(--font-syne)" }}>
+              <label className="text-sm font-bold uppercase tracking-widest text-zinc-500" style={{ fontFamily: "var(--font-syne)" }}>
                 Custom Endpoint (optional)
               </label>
               <div className="flex items-center">
