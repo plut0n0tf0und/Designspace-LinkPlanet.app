@@ -145,7 +145,7 @@ function LinkCard({ link, host, copiedId, onCopy, onToggle, onDelete, isDemo = f
           onClick={handleViewDetails}
           className={`absolute inset-0 flex items-center justify-center bg-black/55 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${isDemo ? "cursor-default" : "cursor-pointer"}`}
         >
-          <div className="flex items-center gap-2 px-5 py-2.5 bg-white/10 border border-white/20 rounded-full text-white text-sm font-semibold backdrop-blur-sm hover:bg-white/20 transition-colors">
+          <div className="flex items-center gap-2 px-5 py-2.5 bg-white/10 border border-white/20 rounded-full text-white text-sm font-semibold backdrop-blur-sm hover:bg-white/20 transition-colors" style={{ fontFamily: "var(--font-urbanist)" }}>
             <span>View Details</span>
             <ArrowUpRight size={15} />
           </div>
@@ -158,10 +158,10 @@ function LinkCard({ link, host, copiedId, onCopy, onToggle, onDelete, isDemo = f
         {/* Title + ACTIVE badge + Toggle */}
         <div className="flex items-start justify-between gap-3">
           <div className="flex flex-col gap-0.5 min-w-0">
-            <h3 className="text-white font-bold text-base leading-snug tracking-tight truncate">
+            <h3 className="text-white font-bold text-base leading-snug tracking-tight truncate" style={{ fontFamily: "var(--font-syne)" }}>
               {title}
             </h3>
-            <span className="text-zinc-500 text-xs">
+            <span className="text-zinc-500 text-xs" style={{ fontFamily: "var(--font-urbanist)" }}>
               Created {timeAgo(link.createdAt)}
             </span>
           </div>
@@ -174,6 +174,7 @@ function LinkCard({ link, host, copiedId, onCopy, onToggle, onDelete, isDemo = f
                   ? "bg-[#2b1f47] text-[#a78bfa] hover:bg-[#3b2a5a]"
                   : "bg-zinc-800/60 text-zinc-500 hover:bg-zinc-700/60 hover:text-zinc-300"
               } ${isDemo ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
+              style={{ fontFamily: "var(--font-urbanist)" }}
               title={link.active ? "Deactivate link" : "Activate link"}
             >
               {link.active ? <ToggleRight size={12} /> : <ToggleLeft size={12} />}
@@ -185,8 +186,8 @@ function LinkCard({ link, host, copiedId, onCopy, onToggle, onDelete, isDemo = f
         {/* Stats Row: Total Clicks (left) + Country flags (right) */}
         <div className="flex items-end justify-between gap-2">
           <div className="flex flex-col gap-0.5">
-            <span className="text-zinc-500 text-[11px] font-medium">Total Clicks</span>
-            <span className="text-white font-bold text-xl leading-tight">
+            <span className="text-zinc-500 text-[11px] font-medium" style={{ fontFamily: "var(--font-urbanist)" }}>Total Clicks</span>
+            <span className="text-white font-bold text-xl leading-tight" style={{ fontFamily: "var(--font-syne)" }}>
               {formatClicks(link.clicks)}
             </span>
           </div>
@@ -220,7 +221,7 @@ function LinkCard({ link, host, copiedId, onCopy, onToggle, onDelete, isDemo = f
         {/* Short URL Row */}
         <div className="flex items-center justify-between gap-2 mt-auto">
           <div className="flex flex-col gap-0.5 min-w-0">
-            <span className="text-zinc-600 text-[10px] font-bold uppercase tracking-widest">
+            <span className="text-zinc-600 text-[10px] font-bold uppercase tracking-widest" style={{ fontFamily: "var(--font-urbanist)" }}>
               Short URL
             </span>
             <span className="text-zinc-300 text-sm font-mono truncate">
