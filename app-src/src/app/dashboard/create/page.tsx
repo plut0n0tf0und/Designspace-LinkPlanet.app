@@ -8,17 +8,8 @@ export default function CreateLink() {
   const router = useRouter();
   const [longUrl, setLongUrl] = useState("");
   const [customSlug, setCustomSlug] = useState("");
-  const [generatedLink, setGeneratedLink] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
-  const [copied, setCopied] = useState(false);
   const [error, setError] = useState("");
-  const [host, setHost] = useState("");
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      setHost(window.location.origin);
-    }
-  }, []);
 
   const handleGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,7 +17,6 @@ export default function CreateLink() {
     
     setIsGenerating(true);
     setError("");
-    setGeneratedLink("");
     
     try {
       const res = await fetch("/api/links", {
@@ -45,18 +35,12 @@ export default function CreateLink() {
         return;
       }
 
-      setGeneratedLink(`${host}/${data.link.slug}`);
+      router.push(`/dashboard/links/${data.link.id}`);
     } catch {
       setError("Network error. Please try again.");
     } finally {
       setIsGenerating(false);
     }
-  };
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(generatedLink);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
@@ -164,35 +148,7 @@ export default function CreateLink() {
           </form>
         </div>
 
-        {/* Result Card */}
-        {generatedLink && (
-          <div className="bg-emerald-500/10 dark:bg-[#2b1f47]/30 border border-emerald-500/20 dark:border-[#2b1f47]/40 rounded-2xl p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-fade-in">
-            <div className="flex flex-col gap-1">
-              <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
-                Successfully Generated!
-              </span>
-              <p className="text-base font-bold font-mono text-zinc-950 dark:text-white">
-                {generatedLink}
-              </p>
-            </div>
-            <button
-              onClick={handleCopy}
-              className="py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-2 self-start sm:self-auto transition-colors"
-            >
-              {copied ? (
-                <>
-                  <Check size={14} />
-                  Copied!
-                </>
-              ) : (
-                <>
-                  <Copy size={14} />
-                  Copy URL
-                </>
-              )}
-            </button>
-          </div>
-        )}
+
 
       </main>
 
