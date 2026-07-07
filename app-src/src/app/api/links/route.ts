@@ -78,6 +78,11 @@ export async function GET() {
         _count: {
           select: { clicks: true },
         },
+        clicks: {
+          select: { country: true },
+          where: { country: { not: null } },
+          distinct: ["country"],
+        },
       },
     });
 
@@ -91,6 +96,7 @@ export async function GET() {
         active: l.active,
         clicks: l._count.clicks,
         createdAt: l.createdAt,
+        countries: l.clicks.map((c) => c.country as string),
       })),
     });
   } catch (error) {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Script from "next/script";
 import { Lock, Eye, EyeOff, ShieldAlert, Loader2, Info, ChevronRight, Lightbulb } from "lucide-react";
@@ -13,6 +13,7 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [mounted, setMounted] = useState(false);
   const [shake, setShake] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -53,12 +54,17 @@ export default function LoginPage() {
     setTimeout(() => setShake(false), 500);
   };
 
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    cardRef.current.style.setProperty("--mouse-x", `${x}px`);
+    cardRef.current.style.setProperty("--mouse-y", `${y}px`);
+  };
+
   return (
-    <main 
-      style={{ background: "radial-gradient(circle at 75% 20%, #3a226b 0%, #18102b 35%, #0c0816 100%)" }}
-      className="min-h-screen w-full flex items-center justify-center p-4 sm:p-6 md:p-12 overflow-y-auto select-none"
-    >
-      
+    <main className="relative min-h-screen w-full overflow-hidden select-none bg-[#0c0816]">
       {/* Load Spline Web Component Script */}
       <Script 
         type="module" 
@@ -66,112 +72,136 @@ export default function LoginPage() {
         strategy="afterInteractive"
       />
 
-      {/* Floating Split Card Container */}
-      <div className="w-full max-w-6xl min-h-[550px] md:h-[650px] bg-[#120c22]/85 border border-[#2b1f47]/50 rounded-[32px] overflow-hidden shadow-[0_30px_80px_rgba(0,0,0,0.85)] flex flex-col md:flex-row backdrop-blur-md relative z-10">
-        
-        {/* Left Column: Credentials Form Container */}
-        <div className="w-full md:w-[45%] lg:w-[40%] bg-[#18102b] flex flex-col justify-between p-8 sm:p-12 z-10 order-2 md:order-1 md:h-full overflow-y-auto border-t md:border-t-0 md:border-r border-[#2b1f47]/40">
-          
-          {/* Top Brand Logo */}
-          <div className="flex items-center gap-1.5 mb-8">
-            <span className="text-[#834dfb] text-2xl font-bold tracking-tight">Link</span>
-            <span className="text-white text-2xl font-bold tracking-tight">Planet</span>
-          </div>
+      {/* Deep Space Background */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_50%,_#2a1658_0%,_#120a22_45%,_#06040b_100%)] z-0"></div>
 
-          {/* Form Area */}
-          <div className="my-auto w-full flex flex-col gap-6">
-            <div className="flex flex-col gap-2">
-              <h2 className="text-3xl font-semibold text-white tracking-tight">
-                Track your links
-              </h2>
-              <p className="text-base text-zinc-400 font-light leading-relaxed">
-                Please enter your credentials to proceed.
+      {/* Cinematic 3D Globe - Positioned large on the right edge */}
+      <div className="absolute inset-0 z-10 pointer-events-auto overflow-hidden">
+        {mounted && (
+          <div className="absolute top-1/2 right-0 w-[800px] h-[800px] md:w-[1100px] md:h-[1100px] transform translate-x-[15%] md:translate-x-[5%] -translate-y-[60%] scale-100 opacity-90 transition-opacity duration-1000 ease-in-out">
+            <spline-viewer url="https://prod.spline.design/IFweu3cI4HJQU3Wj/scene.splinecode" className="w-full h-full"></spline-viewer>
+          </div>
+        )}
+      </div>
+
+      {/* Foreground UI Layer */}
+      <div className="relative z-20 w-full h-screen flex flex-col items-center md:items-start justify-center p-4 sm:p-8 md:pl-[8%] lg:pl-[12%] pointer-events-none">
+        
+        {/* Interactive Floating Card */}
+        <div 
+          ref={cardRef}
+          onMouseMove={handleMouseMove}
+          className="group w-full max-w-[420px] rounded-[32px] shadow-[0_15px_40px_rgba(0,0,0,0.6),0_0_15px_rgba(131,77,251,0.1)] pointer-events-auto flex flex-col relative"
+        >
+          {/* Static Glass Background & Base Border */}
+          <div className="absolute inset-0 rounded-[32px] bg-transparent backdrop-blur-md border border-[#834dfb]/30 pointer-events-none z-0"></div>
+          
+          {/* Mouse-Tracking Border Shine */}
+          <div 
+            className="absolute inset-0 rounded-[32px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10"
+            style={{
+              background: "radial-gradient(300px circle at var(--mouse-x, 0) var(--mouse-y, 0), rgba(131,77,251,0.8), transparent 100%)",
+              WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
+              WebkitMaskComposite: "xor",
+              maskComposite: "exclude",
+              padding: "1.5px", // Creates a 1.5px interactive border
+            }}
+          ></div>
+          
+          {/* Card Content Layer */}
+          <div className="relative z-20 flex flex-col p-8 sm:p-10 overflow-hidden rounded-[32px]">
+            {/* Top Brand Logo */}
+            <div className="flex items-center gap-1.5 mb-8">
+              <span className="text-[#834dfb] text-2xl font-bold tracking-tight">Link</span>
+              <span className="text-white text-2xl font-bold tracking-tight">Planet</span>
+            </div>
+
+            {/* Form Area */}
+            <div className="w-full flex flex-col gap-6">
+              <div className="flex flex-col gap-2">
+                <h2 className="text-3xl font-bold text-white tracking-tight" style={{ fontFamily: "var(--font-syne, 'Syne', sans-serif)" }}>
+                  Track your links
+                </h2>
+                <p className="text-sm text-zinc-400 font-light leading-relaxed">
+                  Please enter your credentials to proceed into the system.
+                </p>
+              </div>
+
+              {/* Error Alert Box */}
+              {error && (
+                <div className="w-full flex items-start gap-3 bg-red-950/40 border border-red-900/50 rounded-xl p-3 text-sm leading-relaxed text-red-300 animate-fadeIn backdrop-blur-md">
+                  <ShieldAlert size={16} className="flex-shrink-0 mt-0.5 text-red-400" />
+                  <span>{error}</span>
+                </div>
+              )}
+
+              {/* Login Form */}
+              <form onSubmit={handlePasswordSubmit} className="w-full flex flex-col gap-5">
+                
+                {/* Password Section */}
+                <div className="w-full flex flex-col gap-2">
+                  <label className="text-xs font-semibold text-zinc-300 uppercase tracking-widest pl-0.5">
+                    Secure Password
+                  </label>
+                  <div className="relative w-full flex items-center">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      disabled={isLoading}
+                      placeholder="Enter passphrase..."
+                      className="w-full pl-5 pr-12 py-3.5 bg-[#18102b]/80 border border-[#2b1f47]/60 rounded-xl text-white placeholder-zinc-600 text-left text-base font-mono focus:border-[#834dfb] focus:ring-1 focus:ring-[#834dfb]/30 focus:bg-[#18102b] outline-none transition-all duration-200 relative z-30"
+                      autoFocus
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      disabled={isLoading}
+                      className="absolute right-3 w-9 h-9 flex items-center justify-center text-zinc-500 hover:text-[#834dfb] rounded-lg transition-colors cursor-pointer z-40"
+                      title={showPassword ? "Hide password" : "Show password"}
+                    >
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Hint Box */}
+                <div className="w-fit flex items-center gap-2 py-1.5 px-3 bg-[#834dfb]/10 border border-[#834dfb]/30 rounded-lg text-xs text-zinc-300 font-normal backdrop-blur-sm">
+                  <Lightbulb size={14} className="text-[#834dfb] flex-shrink-0" />
+                  <span>
+                    Hint: <span className="text-white font-semibold">Katana</span>
+                  </span>
+                </div>
+
+                {/* Submit Button */}
+                <button
+                  type="submit"
+                  disabled={isLoading || !password}
+                  className="w-full py-3.5 px-6 mt-1 bg-[#834dfb] hover:bg-[#743deb] active:scale-[0.98] disabled:bg-[#18102b] disabled:text-zinc-600 disabled:border disabled:border-[#2b1f47]/50 disabled:scale-100 text-white rounded-xl text-sm font-bold uppercase tracking-widest flex items-center justify-center transition-all duration-200 cursor-pointer shadow-[0_0_20px_rgba(131,77,251,0.25)] disabled:shadow-none hover:shadow-[0_0_30px_rgba(131,77,251,0.4)] relative z-30"
+                >
+                  {isLoading ? (
+                    <div className="flex items-center gap-2">
+                      <Loader2 size={16} className="animate-spin" />
+                      Authenticating
+                    </div>
+                  ) : (
+                    "Initialize Connection"
+                  )}
+                </button>
+              </form>
+            </div>
+
+            {/* Bottom Footer Info */}
+            <div className="w-full mt-8 flex items-center justify-between flex-shrink-0 opacity-60 hover:opacity-100 transition-opacity">
+              <div className="flex items-center gap-1.5 text-[10px] font-bold tracking-[0.2em] text-zinc-400 uppercase">
+                <span className="text-[#834dfb]">©</span>
+                <span>Sentinel 2024</span>
+              </div>
+              <p className="text-[10px] text-zinc-500 font-mono tracking-widest">
+                [ SECURE NODE ]
               </p>
             </div>
-
-            {/* Error Alert Box */}
-            {error && (
-              <div className="w-full flex items-start gap-3 bg-red-950/40 border border-red-900/50 rounded-xl p-4 text-base leading-relaxed text-red-300 animate-fadeIn">
-                <ShieldAlert size={18} className="flex-shrink-0 mt-1 text-red-400" />
-                <span>{error}</span>
-              </div>
-            )}
-
-            {/* Login Form */}
-            <form onSubmit={handlePasswordSubmit} className="w-full flex flex-col gap-6">
-              
-              {/* Password Section */}
-              <div className="w-full flex flex-col gap-2.5">
-                <label className="text-base font-semibold text-zinc-300 pl-0.5">
-                  Password
-                </label>
-                <div className="relative w-full flex items-center">
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    disabled={isLoading}
-                    placeholder="Type here..."
-                    className="w-full pl-5 pr-12 py-4 bg-[#1e2129] border border-[#2a2e3d]/30 rounded-2xl text-white placeholder-zinc-600 text-left text-base font-sans focus:border-[#834dfb] focus:ring-1 focus:ring-[#834dfb]/20 outline-none transition-all duration-200"
-                    autoFocus
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    disabled={isLoading}
-                    className="absolute right-4 w-9 h-9 flex items-center justify-center text-zinc-500 hover:text-zinc-300 rounded-lg transition-colors cursor-pointer"
-                    title={showPassword ? "Hide password" : "Show password"}
-                  >
-                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                  </button>
-                </div>
-              </div>
-
-              {/* Hint Box (Intuitively styled with fill, light border, and bulb icon) */}
-              <div className="w-fit self-start flex items-center gap-2 py-2 px-3 bg-[#834dfb]/10 border border-[#834dfb]/30 rounded-xl text-base text-zinc-300 font-normal">
-                <Lightbulb size={18} className="text-[#834dfb] flex-shrink-0" />
-                <span>
-                  Hint: <span className="text-white font-semibold">Katana</span>
-                </span>
-              </div>
-
-              {/* Submit Button (Electric Violet Button, White Text with 8px corner radius) */}
-              <button
-                type="submit"
-                disabled={isLoading || !password}
-                className="w-full py-4 px-6 bg-[#834dfb] hover:bg-[#743deb] active:scale-[0.98] disabled:bg-zinc-800 disabled:text-zinc-600 disabled:scale-100 text-white rounded-[8px] text-base font-bold uppercase tracking-wider flex items-center justify-center transition-all duration-200 cursor-pointer shadow-md shadow-[#834dfb]/10 disabled:shadow-none"
-              >
-                {isLoading ? (
-                  <div className="flex items-center gap-2">
-                    <Loader2 size={16} className="animate-spin" />
-                    Verifying...
-                  </div>
-                ) : (
-                  "UNLOCK ACCESS"
-                )}
-              </button>
-            </form>
           </div>
-
-          {/* Bottom Footer Info */}
-          <div className="w-full flex flex-col gap-1.5 mt-8 md:mt-0 flex-shrink-0">
-            <p className="text-base text-zinc-500 font-light">
-              End-to-end encrypted connection established
-            </p>
-            <div className="flex items-center gap-1.5 text-base font-bold tracking-[0.18em] text-zinc-500 uppercase">
-              <span className="text-[#834dfb]">©</span>
-              <span>Sentinel Systems 2024</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Right Column: Interactive 3D Spline Scene (No overlays, full opacity) */}
-        <div className="w-full md:w-[55%] lg:w-[60%] h-[35vh] md:h-full bg-black/10 relative z-0 flex items-center justify-center overflow-hidden order-1 md:order-2 border-t md:border-t-0 md:border-l border-[#2b1f47]/30">
-          {mounted && (
-            <div className="w-full h-full pointer-events-auto select-none opacity-100 transform translate-y-[-8%] md:translate-y-[-5%]">
-              <spline-viewer url="https://prod.spline.design/IFweu3cI4HJQU3Wj/scene.splinecode" className="w-full h-full"></spline-viewer>
-            </div>
-          )}
         </div>
       </div>
 
