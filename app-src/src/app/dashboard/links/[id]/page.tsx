@@ -97,6 +97,7 @@ interface ClickItem {
 
 interface LinkData {
   id: string;
+  domain?: string;
   slug: string;
   originalUrl: string;
   active: boolean;
@@ -186,7 +187,8 @@ export default function LinkDetails() {
 
   const handleCopy = () => {
     if (!link) return;
-    const shortUrl = `${window.location.origin}/${link.slug}`;
+    const protocol = window.location.protocol;
+    const shortUrl = link.domain ? `${protocol}//${link.domain}/${link.slug}` : `${window.location.origin}/${link.slug}`;
     navigator.clipboard.writeText(shortUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -201,7 +203,8 @@ export default function LinkDetails() {
 
   const handleCopyShort = () => {
     if (!link) return;
-    const shortUrl = `${window.location.origin}/${link.slug}`;
+    const protocol = window.location.protocol;
+    const shortUrl = link.domain ? `${protocol}//${link.domain}/${link.slug}` : `${window.location.origin}/${link.slug}`;
     navigator.clipboard.writeText(shortUrl);
     setCopiedShort(true);
     setTimeout(() => setCopiedShort(false), 2000);
@@ -246,7 +249,8 @@ export default function LinkDetails() {
     );
   }
 
-  const shortUrl = `${window.location.origin}/${link.slug}`;
+  const protocol = typeof window !== 'undefined' ? window.location.protocol : 'https:';
+  const shortUrl = link.domain ? `${protocol}//${link.domain}/${link.slug}` : `${window.location.origin}/${link.slug}`;
 
   return (
     <div className="link-details-page min-h-screen bg-[#0e0818] text-zinc-100">

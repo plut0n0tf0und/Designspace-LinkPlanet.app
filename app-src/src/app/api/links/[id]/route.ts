@@ -120,6 +120,7 @@ export async function GET(
       success: true,
       link: {
         id: link.id,
+        domain: link.domain,
         slug: link.slug,
         originalUrl: link.originalUrl,
         active: link.active,
