@@ -298,7 +298,15 @@ export default function LinkDetails() {
                 </div>
               </div>
             </div>
-            <div className="original-url-text text-white font-medium text-lg sm:text-[24px] leading-tight truncate" style={{ fontFamily: "var(--font-syne)" }}>{link.originalUrl}</div>
+            <a 
+              href={link.originalUrl} 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="block original-url-text text-white font-medium text-lg md:text-xl lg:text-[24px] leading-tight truncate hover:underline hover:text-white underline-offset-4 decoration-[#834dfb] transition-all" 
+              style={{ fontFamily: "var(--font-syne)" }}
+            >
+              {link.originalUrl}
+            </a>
           </div>
 
           {/* Shortened URL */}
@@ -307,9 +315,14 @@ export default function LinkDetails() {
               Shortened URL
             </div>
             <div className="shortened-url-input-group flex flex-wrap items-center gap-3">
-              <div className="shortened-url-input flex-1 bg-[#0e0818] border border-[#2b1f47]/50 rounded-lg px-4 py-3 text-zinc-300 font-mono text-sm">
+              <a 
+                href={shortUrl} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="shortened-url-input block overflow-hidden flex-1 bg-[#0e0818] border border-[#2b1f47]/50 rounded-lg px-4 py-3 text-zinc-300 font-mono text-xs sm:text-sm truncate hover:text-white hover:underline underline-offset-4 decoration-[#834dfb] transition-all"
+              >
                 {shortUrl}
-              </div>
+              </a>
               <button
                 onClick={handleCopy}
                 className={`copy-button flex items-center justify-center gap-2 px-5 py-3 rounded-lg font-medium text-sm transition-all copy-button-ripple ${
