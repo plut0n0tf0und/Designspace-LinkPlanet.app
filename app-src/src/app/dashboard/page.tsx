@@ -21,6 +21,7 @@ import ConfirmDeleteModal from "@/components/ConfirmDeleteModal";
 
 interface LinkItem {
   id: string;
+  domain?: string;
   slug: string;
   originalUrl: string;
   title?: string;
@@ -33,6 +34,7 @@ interface LinkItem {
 // Sample demo card shown while the list is empty or as first card
 const SAMPLE_CARD: LinkItem = {
   id: "sample-demo",
+  domain: "vignesh-designspace.vercel.app",
   slug: "portfolio",
   originalUrl: "https://sukoya.design",
   title: "Sukoya Design",
@@ -82,7 +84,7 @@ interface LinkCardProps {
   link: LinkItem;
   host: string;
   copiedId: string | null;
-  onCopy: (slug: string, id: string) => void;
+  onCopy: (slug: string, id: string, domain?: string) => void;
   onToggle: (id: string, active: boolean) => void;
   onDelete: (id: string) => void;
   isDemo?: boolean;
@@ -92,7 +94,7 @@ function LinkCard({ link, host, copiedId, onCopy, onToggle, onDelete, isDemo = f
   const router = useRouter();
   const title = link.title || getDomain(link.originalUrl);
   const isCopied = copiedId === link.id;
-  const shortUrl = `${host || "linkplanet.app"}/${link.slug}`;
+  const shortUrl = `${link.domain || host || "linkplanet.app"}/${link.slug}`;
 
   const handleViewDetails = () => {
     if (!isDemo) router.push(`/dashboard/links/${link.id}`);
@@ -229,7 +231,7 @@ function LinkCard({ link, host, copiedId, onCopy, onToggle, onDelete, isDemo = f
             </span>
           </div>
           <button
-            onClick={() => onCopy(link.slug, link.id)}
+            onClick={() => onCopy(link.slug, link.id, link.domain)}
             className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-[#2b1f47]/60 hover:bg-[#2b1f47] border border-[#2b1f47]/80 hover:border-[#834dfb]/40 text-zinc-400 hover:text-white transition-all duration-200 cursor-pointer"
             title="Copy short URL"
           >
@@ -350,8 +352,8 @@ export default function Dashboard() {
     }
   }, []);
 
-  const handleCopy = (slug: string, id: string) => {
-    const fullUrl = `${host}/${slug}`;
+  const handleCopy = (slug: string, id: string, domain?: string) => {
+    const fullUrl = `${domain || host}/${slug}`;
     navigator.clipboard.writeText(fullUrl);
     setCopiedId(id);
     setTimeout(() => setCopiedId(null), 2000);

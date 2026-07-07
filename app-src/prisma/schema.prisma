@@ -8,14 +8,15 @@ datasource db {
 
 model Link {
   id          String   @id @default(cuid())
-  slug        String   @unique
+  domain      String   @default("vignesh-designspace.vercel.app")
+  slug        String
   originalUrl String
   active      Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   clicks      Click[]
 
-  @@index([slug])
+  @@unique([domain, slug])
 }
 
 model Click {

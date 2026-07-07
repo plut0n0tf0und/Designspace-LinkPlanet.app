@@ -8,7 +8,9 @@ export default function CreateLink() {
   const router = useRouter();
   const [longUrl, setLongUrl] = useState("");
   const [customSlug, setCustomSlug] = useState("");
+  const [domain, setDomain] = useState(process.env.NEXT_PUBLIC_DEFAULT_DOMAIN || "");
   const [isGenerating, setIsGenerating] = useState(false);
+  const allowedDomains = (process.env.NEXT_PUBLIC_ALLOWED_DOMAINS || "").split(",").filter(Boolean);
   const [error, setError] = useState("");
 
   const handleGenerate = async (e: React.FormEvent) => {
@@ -25,6 +27,7 @@ export default function CreateLink() {
         body: JSON.stringify({
           url: longUrl.trim(),
           slug: customSlug.trim() || undefined,
+          domain,
         }),
       });
 
@@ -106,6 +109,29 @@ export default function CreateLink() {
                 The long destination page where users will be redirected.
               </span>
             </div>
+
+            {/* Domain Selection */}
+            {allowedDomains.length > 0 && (
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-bold uppercase tracking-widest text-zinc-500" style={{ fontFamily: "var(--font-syne)" }}>
+                  Domain
+                </label>
+                <select
+                  value={domain}
+                  onChange={(e) => setDomain(e.target.value)}
+                  className="w-full p-3 bg-[#0e0818] border border-[#2b1f47]/50 rounded-[8px] outline-none text-white focus:border-[#834dfb] transition-all text-sm font-sans"
+                >
+                  {allowedDomains.map((d) => (
+                    <option key={d} value={d}>
+                      {d}
+                    </option>
+                  ))}
+                </select>
+                <span className="text-sm text-zinc-500">
+                  Select the domain to host this short link.
+                </span>
+              </div>
+            )}
 
             {/* Custom Slug */}
             <div className="flex flex-col gap-2">

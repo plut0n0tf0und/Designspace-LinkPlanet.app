@@ -4,7 +4,8 @@ import { prisma } from "@/lib/prisma";
 // POST — Create a new shortened link
 export async function POST(req: NextRequest) {
   try {
-    const { url, slug } = await req.json();
+    const { url, slug, domain } = await req.json();
+    const finalDomain = domain || process.env.NEXT_PUBLIC_DEFAULT_DOMAIN || "vignesh-designspace.vercel.app";
 
     // Validate URL
     if (!url || typeof url !== "string") {
@@ -28,7 +29,11 @@ export async function POST(req: NextRequest) {
     const finalSlug = slug?.trim() || Math.random().toString(36).substring(2, 8);
 
     // Check if slug already exists
-    const existing = await prisma.link.findUnique({ where: { slug: finalSlug } });
+    const existing = await prisma.link.findUnique({ 
+      where: { 
+        domain_slug: { domain: finalDomain, slug: finalSlug } 
+      } 
+    });
     if (existing) {
       return NextResponse.json(
         { success: false, message: "This custom endpoint is already taken" },
@@ -39,6 +44,7 @@ export async function POST(req: NextRequest) {
     // Create the link in the database
     const link = await prisma.link.create({
       data: {
+        domain: finalDomain,
         slug: finalSlug,
         originalUrl: url,
       },
@@ -48,6 +54,7 @@ export async function POST(req: NextRequest) {
       success: true,
       link: {
         id: link.id,
+        domain: link.domain,
         slug: link.slug,
         originalUrl: link.originalUrl,
         createdAt: link.createdAt,
@@ -78,6 +85,7 @@ export async function GET() {
       success: true,
       links: links.map((l) => ({
         id: l.id,
+        domain: l.domain,
         slug: l.slug,
         originalUrl: l.originalUrl,
         active: l.active,

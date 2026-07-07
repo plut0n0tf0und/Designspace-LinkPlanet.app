@@ -9,9 +9,15 @@ export async function GET(
 ) {
   try {
     const { slug } = await params;
+    const host = req.headers.get("x-forwarded-host") || req.headers.get("host") || "";
 
     const link = await prisma.link.findUnique({
-      where: { slug },
+      where: {
+        domain_slug: {
+          domain: host,
+          slug,
+        }
+      },
     });
 
     if (!link || !link.active) {
